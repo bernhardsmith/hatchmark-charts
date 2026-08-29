@@ -242,13 +242,14 @@
       }
     }
     const suffix = unit ? unit + a.suffix : a.suffix;
+    const decimals = div > 1 && maxAbs / div < 20 ? Math.max(a.decimals, 1) : a.decimals;
     return {
       div,
       suffix: unit,
-      plain: (v) => formatNumber(v / div, a.decimals, a.prefix, suffix),
+      plain: (v) => formatNumber(v / div, decimals, a.prefix, suffix),
       signed: (v) => {
-        const body = formatNumber(v / div, a.decimals, a.prefix, suffix);
-        const rounds0 = Number(Math.abs(v / div).toFixed(a.decimals)) === 0;
+        const body = formatNumber(v / div, decimals, a.prefix, suffix);
+        const rounds0 = Number(Math.abs(v / div).toFixed(decimals)) === 0;
         return v > 0 && !rounds0 ? `+${body}` : body;
       }
     };
@@ -1368,7 +1369,7 @@
     const totAc = rows.reduce((s, r) => s + (r.ac ?? 0), 0);
     const totPl = rows.reduce((s, r) => s + (r.pl ?? 0), 0);
     const total = { label: "\u03A3", ac: totAc, pl: totPl, diff: totAc - totPl, pct: totPl > 0 ? (totAc - totPl) / totPl * 100 : null };
-    const allValues = rows.flatMap((r) => [r.ac ?? 0, r.pl ?? 0]).concat([totAc, totPl]);
+    const allValues = rows.flatMap((r) => [r.ac ?? 0, r.pl ?? 0]);
     const axis = { min: 0, max: 1, ticks: 0, decimals, prefix: options.axis?.prefix ?? "", suffix: options.axis?.suffix ?? "", label: options.axis?.label ?? dataset.unit };
     const fmt2 = makeFormatter(allValues, axis, options.axis?.auto_scale !== false);
     const height = options.height ?? Math.max(120, 8 + HEADER_H + (rows.length + 1) * ROW_H + 46);
@@ -1798,7 +1799,7 @@
   }
 
   // src/liveCharts.ts
-  var REGISTRY_VERSION = "0.3.0";
+  var REGISTRY_VERSION = "0.3.1";
   var SETTINGS_KEY = "hatchmark-live-charts";
   var THEME_KEY = "hatchmark-theme";
   function newRecordId() {
@@ -1874,6 +1875,7 @@
     const workbookTheme = loadWorkbookTheme();
     const svg = renderChart(record.chart, mapped.dataset, {
       ...record.options,
+      axis: { auto_scale: record.options.auto_scale !== false },
       theme: workbookTheme ?? void 0,
       compare: ["AC", "FC"],
       version: REGISTRY_VERSION
@@ -2282,6 +2284,7 @@
     const showLabels = $("show-labels").checked;
     const chartHeights = { "column-with-variance": 260, "small-multiples-column": 230 };
     const comments = parseCommentLines($("comments-input").value);
+    const autoScale = $("auto-scale").checked;
     const options = {
       width: 320,
       height: chart === "variance-table" ? void 0 : chartHeights[chart] ?? 200,
@@ -2291,7 +2294,8 @@
       compare: ["AC", "FC"],
       version: REGISTRY_VERSION,
       theme: loadWorkbookTheme() ?? void 0,
-      comments: comments.length > 0 ? comments : void 0
+      comments: comments.length > 0 ? comments : void 0,
+      axis: { auto_scale: autoScale }
     };
     return { chart, options };
   }
@@ -2485,7 +2489,8 @@
           show_data_labels: options.show_data_labels ?? false,
           width,
           height,
-          comments: options.comments
+          comments: options.comments,
+          auto_scale: options.axis?.auto_scale !== false
         },
         registry_version: REGISTRY_VERSION,
         updated: (/* @__PURE__ */ new Date()).toISOString()
@@ -2624,6 +2629,7 @@
     $("reporting-unit").value = record.meta.reporting_unit ?? "";
     $("good-direction").value = record.meta.good_direction;
     $("comments-input").value = formatCommentLines(record.options.comments);
+    $("auto-scale").checked = record.options.auto_scale !== false;
     highlightThumb();
     try {
       await Excel.run(async (ctx) => {
@@ -2670,7 +2676,8 @@
       baseline: options.baseline,
       colour_mode: options.colour_mode ?? "colour",
       show_data_labels: options.show_data_labels ?? false,
-      comments: options.comments
+      comments: options.comments,
+      auto_scale: options.axis?.auto_scale !== false
     };
     if (chartChanged) {
       try {
@@ -2871,7 +2878,7 @@
     $("live-toggle").addEventListener("change", () => {
       setLiveEnabled($("live-toggle").checked);
     });
-    for (const id of ["chart-type", "baseline", "colour-mode", "show-labels", "measure", "unit", "reporting-unit", "good-direction"]) {
+    for (const id of ["chart-type", "baseline", "colour-mode", "show-labels", "auto-scale", "measure", "unit", "reporting-unit", "good-direction"]) {
       $(id).addEventListener("change", () => {
         if (state.dataset) {
           const meta = readMeta();
