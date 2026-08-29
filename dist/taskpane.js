@@ -2809,26 +2809,31 @@
     }
     sharedRuntime = Office.context.requirements.isSetSupported("SharedRuntime", "1.1");
     if (sharedRuntime) {
-      try {
-        void Office.addin.setStartupBehavior(Office.StartupBehavior.none);
-      } catch {
-      }
       $("live-toggle-label").textContent = "Update charts automatically while the workbook is open";
     }
-    const AUTO_OPEN_KEY = "Office.AutoShowTaskpaneWithDocument";
+    const AUTO_OPEN_KEY = "hatchmark-auto-open";
     const autoOpenStored = Office.context.document.settings.get(AUTO_OPEN_KEY);
     const autoOpen = autoOpenStored === null || autoOpenStored === void 0 ? true : autoOpenStored === true;
     $("auto-open").checked = autoOpen;
-    if (autoOpenStored === null || autoOpenStored === void 0) {
-      Office.context.document.settings.set(AUTO_OPEN_KEY, true);
-      Office.context.document.settings.saveAsync(() => {
-      });
-    }
-    $("auto-open").addEventListener("change", () => {
-      const on = $("auto-open").checked;
+    function applyAutoOpen(on) {
+      try {
+        void Office.addin.setStartupBehavior(on ? Office.StartupBehavior.load : Office.StartupBehavior.none);
+      } catch {
+      }
       Office.context.document.settings.set(AUTO_OPEN_KEY, on);
       Office.context.document.settings.saveAsync(() => {
       });
+    }
+    applyAutoOpen(autoOpen);
+    if (autoOpen) {
+      try {
+        void Office.addin.showAsTaskpane();
+      } catch {
+      }
+    }
+    $("auto-open").addEventListener("change", () => {
+      const on = $("auto-open").checked;
+      applyAutoOpen(on);
       setStatus(on ? "This pane will reopen automatically with this workbook (after you save it)." : "This pane will no longer open automatically with this workbook.");
     });
     buildPicker();
