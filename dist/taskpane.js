@@ -76,6 +76,133 @@
     return v > 0 && Number(Math.abs(v).toFixed(decimals)) !== 0 ? `+${body}` : body;
   }
 
+  // node_modules/hatchmark/src/lint.ts
+  var DISTINCT_FILL_SCENARIOS = ["PL", "BU", "FC"];
+  function isVarianceChart(chart) {
+    const t = chart.toLowerCase();
+    return t.includes("variance") || t.includes("contribution");
+  }
+  function zeroExempt(chart) {
+    const t = chart.toLowerCase();
+    return isVarianceChart(t) || t.includes("waterfall") || t.includes("indexed") || t.includes("scatter") || t.includes("bubble") || t === "scatter-plot" || t === "bubble-chart";
+  }
+  function hasMixedSigns(input) {
+    let pos = false;
+    let neg = false;
+    for (const s of input.series) {
+      for (const v of s.values ?? []) {
+        if (v !== null && v > 0) pos = true;
+        if (v !== null && v < 0) neg = true;
+      }
+    }
+    return pos && neg;
+  }
+  var name = (input) => input.name ?? input.chart;
+  var CHECKS = {
+    "zero-baseline": (input) => {
+      const min = input.axis?.min;
+      if (zeroExempt(input.chart) || min === void 0 || min <= 0) return null;
+      return {
+        rule: "zero-baseline",
+        severity: "warning",
+        category: "notation",
+        message: `"${name(input)}": value axis starts at ${min}, not zero \u2014 a cut axis misrepresents the underlying values. Set the minimum to 0. [CH 1.1]`
+      };
+    },
+    "scenario-notation": (input) => {
+      if (input.options?.auto_scenario_fill !== false) return null;
+      const affected = input.series.filter(
+        (s) => s.scenario && DISTINCT_FILL_SCENARIOS.includes(s.scenario) && !s.fill
+      );
+      if (affected.length === 0) return null;
+      const scenarios = affected.map((s) => s.scenario).join("/");
+      return {
+        rule: "scenario-notation",
+        severity: "info",
+        category: "notation",
+        message: `"${name(input)}": scenario notation is off, so ${scenarios} data is not shown as ${affected.map((s) => scenarioFill(s.scenario)).join("/")}. Enable it so planned/forecast data reads at a glance. [UN 3.2]`
+      };
+    },
+    "stacked-mixed-signs": (input) => {
+      const stacked = input.chart.includes("stacked") || input.chart.includes("normalized");
+      if (!stacked || !hasMixedSigns(input)) return null;
+      return {
+        rule: "stacked-mixed-signs",
+        severity: "warning",
+        category: "notation",
+        message: `"${name(input)}": a stacked chart mixes positive and negative values \u2014 segments no longer sum meaningfully. Split the measures or use a different chart. [EX 1.1]`
+      };
+    },
+    "variance-needs-baseline": (input) => {
+      if (!isVarianceChart(input.chart) || input.series.length >= 2) return null;
+      return {
+        rule: "variance-needs-baseline",
+        severity: "warning",
+        category: "data",
+        message: `"${name(input)}": a variance chart needs at least two scenarios (e.g. AC and PL) to compute a variance. [UN 4.1]`
+      };
+    },
+    "bullet-needs-target": (input) => {
+      if (!input.chart.includes("bullet") || input.series.length >= 2) return null;
+      return {
+        rule: "bullet-needs-target",
+        severity: "warning",
+        category: "data",
+        message: `"${name(input)}": a bullet graph needs a target/reference series (e.g. PL) alongside the measure.`
+      };
+    },
+    "small-multiples-panels": (input) => {
+      if (!input.chart.includes("small-multiples") || input.series.length >= 2) return null;
+      return {
+        rule: "small-multiples-panels",
+        severity: "info",
+        category: "data",
+        message: `"${name(input)}": small multiples compare several panels of the same measure \u2014 add more data series (one per segment). [CO 5.1]`
+      };
+    }
+  };
+  var INAPPROPRIATE = ["pie", "doughnut", "donut", "ring", "radar", "gauge", "speedometer"];
+  CHECKS["replace-inappropriate-chart-types"] = (input) => {
+    const t = input.chart.toLowerCase();
+    if (!INAPPROPRIATE.some((b) => t.includes(b))) return null;
+    return {
+      rule: "replace-inappropriate-chart-types",
+      severity: "warning",
+      category: "notation",
+      message: `"${name(input)}": pie/ring, radar and gauge chart types hide the comparisons that bars and columns make visible \u2014 replace with bars, columns or a stacked column. [EX 2.1 / EX 2.2]`
+    };
+  };
+  CHECKS["pseudo-3d"] = (input) => {
+    const t = input.chart.toLowerCase();
+    const solid = ["surface", "cylinder", "cone", "pyramid"].some((m) => t.includes(m));
+    if (!(t.includes("3d") || t.includes("3-d") || solid)) return null;
+    return {
+      rule: "pseudo-3d",
+      severity: "warning",
+      category: "notation",
+      message: `"${name(input)}": 3-D effects distort size perception and add no information \u2014 use the flat equivalent. [SI 2.1]`
+    };
+  };
+  CHECKS["shared-scale-groups"] = (input) => {
+    if (!input.scale_group || !input.group_units) return null;
+    const units = new Set(input.group_units.map((u) => u.trim().toLowerCase()));
+    if (units.size <= 1) return null;
+    return {
+      rule: "shared-scale-groups",
+      severity: "warning",
+      category: "consistency",
+      message: `"${name(input)}": its scale group mixes units \u2014 charts share a scale only when they share measure and unit. [CH 4.1 / CO 5.1]`
+    };
+  };
+  function lint(input) {
+    const out = [];
+    for (const check of Object.values(CHECKS)) {
+      const finding = check(input);
+      if (finding) out.push(finding);
+    }
+    return out;
+  }
+
   // node_modules/hatchmark/src/svg.ts
   function esc(text2) {
     return text2.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -1803,8 +1930,8 @@
     }
     return s;
   }
-  function quoteSheet(name) {
-    return `'${name.replace(/'/g, "''")}'`;
+  function quoteSheet(name2) {
+    return `'${name2.replace(/'/g, "''")}'`;
   }
   function locate(values, sourceAddress, orientation) {
     const ref = parseAddress(sourceAddress);
@@ -1904,7 +2031,7 @@
   }
 
   // src/liveCharts.ts
-  var REGISTRY_VERSION = "0.4.0";
+  var REGISTRY_VERSION = "0.5.0";
   var SETTINGS_KEY = "hatchmark-live-charts";
   var THEME_KEY = "hatchmark-theme";
   function newRecordId() {
@@ -1974,18 +2101,60 @@
       );
     });
   }
-  function renderRecordSvg(record, values) {
+  function renderRecordSvg(record, values, axisMax) {
     const mapped = rangeToDataset(values, record.meta);
     if (!mapped.dataset) return { errors: mapped.errors };
     const workbookTheme = loadWorkbookTheme();
     const svg = renderChart(record.chart, mapped.dataset, {
       ...record.options,
-      axis: { auto_scale: record.options.auto_scale !== false },
+      axis: { auto_scale: record.options.auto_scale !== false, max: axisMax },
       theme: workbookTheme ?? void 0,
       compare: ["AC", "FC"],
       version: REGISTRY_VERSION
     });
     return { svg, errors: [] };
+  }
+  var CUMULATIVE_CHARTS = /* @__PURE__ */ new Set(["waterfall-column", "contribution-waterfall"]);
+  function groupMembers(records, group) {
+    if (!group) return [];
+    return records.filter((r) => r.options.scale_group === group);
+  }
+  var groupMaxCache = /* @__PURE__ */ new Map();
+  var GROUP_MAX_TTL_MS = 400;
+  async function groupAxisMax(record) {
+    const group = record.options.scale_group;
+    if (!group) return void 0;
+    const cached = groupMaxCache.get(group);
+    if (cached && Date.now() - cached.at < GROUP_MAX_TTL_MS) return cached.value;
+    const members = groupMembers(loadRecords(), group);
+    if (members.length < 2) {
+      groupMaxCache.set(group, { at: Date.now(), value: void 0 });
+      return void 0;
+    }
+    let maxV = 0;
+    await Excel.run(async (ctx) => {
+      const loads = [];
+      for (const m of members) {
+        const sheet = ctx.workbook.worksheets.getItemOrNullObject(m.worksheetId);
+        loads.push({ m, sheet });
+      }
+      await ctx.sync();
+      const ranges = loads.filter(({ sheet }) => !sheet.isNullObject).map(({ m, sheet }) => {
+        const range = sheet.getRange(stripSheet(m.sourceAddress));
+        range.load("values");
+        return { m, range };
+      });
+      await ctx.sync();
+      for (const { m, range } of ranges) {
+        const mapped = rangeToDataset(range.values, m.meta);
+        for (const series of mapped.dataset?.series ?? []) {
+          for (const v of series.values) if (v !== null && v > maxV) maxV = v;
+        }
+      }
+    });
+    const value = maxV > 0 ? maxV * 1.1 : void 0;
+    groupMaxCache.set(group, { at: Date.now(), value });
+    return value;
   }
   var lastValues = /* @__PURE__ */ new Map();
   function valuesChanged(recordId, values) {
@@ -2076,10 +2245,11 @@
       values = range.values;
     });
     if (missingSource) return { ok: false, message: `${record.shapeName}: source worksheet no longer exists.` };
-    if (!valuesChanged(record.id, values) && !force) {
+    if (!valuesChanged(record.id, values) && !force && !record.options.scale_group) {
       return { ok: true, skipped: true, message: `${record.chart}: no data change` };
     }
-    const rendered = renderRecordSvg(record, values);
+    const axisMax = record.options.scale_group && !CUMULATIVE_CHARTS.has(record.chart) ? await groupAxisMax(record) : void 0;
+    const rendered = renderRecordSvg(record, values, axisMax);
     if (!rendered.svg) return { ok: false, message: `${record.shapeName}: ${rendered.errors.join(" ")}` };
     const png = await svgToPngBase64(rendered.svg, record.options.width, record.options.height);
     let structuralChange = false;
@@ -2164,7 +2334,12 @@
     await Excel.run(async (ctx) => {
       ctx.workbook.worksheets.onChanged.add(async (event) => {
         if (!liveEnabled) return;
-        const affected = chartsAffectedBy(loadRecords(), event.worksheetId, event.address);
+        const records = loadRecords();
+        const direct = chartsAffectedBy(records, event.worksheetId, event.address);
+        const groups = new Set(direct.map((r) => r.options.scale_group).filter(Boolean));
+        const affected = records.filter(
+          (r) => direct.includes(r) || r.options.scale_group && groups.has(r.options.scale_group)
+        );
         for (const record of affected) {
           clearTimeout(pending.get(record.id));
           pending.set(
@@ -2395,6 +2570,259 @@
     }
   ];
 
+  // src/assist.ts
+  function recommendCharts(ds) {
+    const scenarios = new Set(ds.series.map((s) => s.scenario));
+    const labelled = ds.series.filter((s) => s.label).length;
+    const hasBaseline = scenarios.has("PL") || scenarios.has("BU");
+    const hasMeasured = scenarios.has("AC") || scenarios.has("FC");
+    const categorical = ds.granularity === "categorical";
+    const n = ds.periods.length;
+    const recs = [];
+    const add = (chart, reason) => {
+      if (!recs.some((r) => r.chart === chart) && recs.length < 3) recs.push({ chart, reason });
+    };
+    if (categorical) {
+      if (hasBaseline && hasMeasured) {
+        add("absolute-variance-bar", "Categories vs a baseline: \u0394 bars show each category\u2019s beat or miss at a glance.");
+        add("basic-bar", "The level view: one bar per category, scenario notation carrying AC/PL identity.");
+      } else {
+        add("basic-bar", "Structure data reads best as bars \u2014 categories down, values across.");
+      }
+      if (labelled >= 2) add("cross-table", "Two structure dimensions: categories across, labelled rows down, totals closing both.");
+      add("relative-variance-pins-bar", "\u0394% pins rank categories by relative performance.");
+    } else {
+      if (labelled >= 3) {
+        add("small-multiples-column", `${labelled} entities of one measure: one panel each, a single shared scale (CH 4.1).`);
+        add("time-series-table", "The same comparison as exact numbers: periods across, one row per entity, \u03A3 closing both.");
+      }
+      if (hasBaseline && hasMeasured) {
+        add("column-with-variance", "The report chart: level plus \u0394PL and \u0394PL% tiers in one aligned view (CO 4.2).");
+        add("contribution-waterfall", "The bridge names the story: from the plan total, step by step, to the outturn.");
+        add("variance-table", "Exact numbers with in-cell variance marks \u2014 the table form of the same analysis.");
+      }
+      if (n > 12) add("basic-line", `${n} periods: a line carries long series better than ${n} columns (EX 1.1).`);
+      add("basic-column", "The default level view: columns over time with scenario notation.");
+    }
+    return recs;
+  }
+  function comparedValues(ds) {
+    const order = ["AC", "FC"];
+    return ds.periods.map((_, i) => {
+      for (const sc of order) {
+        for (const s of ds.series) {
+          if (s.scenario === sc && s.values[i] !== null && s.values[i] !== void 0) return s.values[i];
+        }
+      }
+      return null;
+    });
+  }
+  function draftCommentary(ds, baseline = "PL") {
+    const base = ds.series.find((s) => s.scenario === baseline && !s.label);
+    const cmp = comparedValues(ds);
+    if (!base) return null;
+    const deltas = ds.periods.map((p, i) => {
+      const b = base.values[i];
+      const c = cmp[i];
+      if (b === null || b === void 0 || c === null) return null;
+      return { period: p, delta: c - b, pct: b > 0 ? (c - b) / b * 100 : null };
+    });
+    const present = deltas.filter((d) => d !== null);
+    if (present.length === 0) return null;
+    const unit = ds.unit ? ` ${ds.unit}` : "";
+    const fmtN = (v) => {
+      const rounded = Math.abs(v) >= 100 ? Math.round(v) : Math.round(v * 10) / 10;
+      return `${v > 0 ? "+" : v < 0 ? "\u2212" : ""}${Math.abs(rounded)}`;
+    };
+    const best = present.reduce((a, b) => b.delta > a.delta ? b : a);
+    const worst = present.reduce((a, b) => b.delta < a.delta ? b : a);
+    const totalC = present.reduce((s, d) => s + d.delta, 0);
+    const totalB = ds.periods.reduce((s, _, i) => s + (deltas[i] && base.values[i] || 0), 0);
+    const totalPct = totalB > 0 ? totalC / totalB * 100 : null;
+    const sentences = [];
+    sentences.push(
+      `${ds.measure} runs ${fmtN(totalC)}${unit} (${totalPct !== null ? `${fmtN(totalPct)}%` : "n/a"}) versus ${baseline} across ${present.length} reported period${present.length === 1 ? "" : "s"}.`
+    );
+    if (best.delta > 0) {
+      sentences.push(`The strongest beat is ${best.period} at ${fmtN(best.delta)}${unit}${best.pct !== null ? ` (${fmtN(best.pct)}%)` : ""}.`);
+    }
+    if (worst.delta < 0 && worst.period !== best.period) {
+      sentences.push(`The sharpest miss is ${worst.period} at ${fmtN(worst.delta)}${unit}${worst.pct !== null ? ` (${fmtN(worst.pct)}%)` : ""}.`);
+    }
+    let streak = 0;
+    let maxStreak = 0;
+    let streakEnd = "";
+    for (const d of present) {
+      streak = d.delta < 0 ? streak + 1 : 0;
+      if (streak > maxStreak) {
+        maxStreak = streak;
+        streakEnd = d.period;
+      }
+    }
+    if (maxStreak >= 3) sentences.push(`Note the ${maxStreak}-period adverse run ending ${streakEnd}.`);
+    const markers = [];
+    if (best.delta > 0) markers.push({ period: best.period, text: `${fmtN(best.delta)}${unit} vs ${baseline} \u2014 explain the beat` });
+    if (worst.delta < 0 && worst.period !== best.period) markers.push({ period: worst.period, text: `${fmtN(worst.delta)}${unit} vs ${baseline} \u2014 explain the miss` });
+    return { narrative: sentences.join(" "), markers };
+  }
+
+  // src/workbookCheck.ts
+  function stripSheet2(address) {
+    const bang = address.lastIndexOf("!");
+    return bang >= 0 ? address.slice(bang + 1) : address;
+  }
+  async function collectNativeCharts() {
+    const facts = [];
+    await Excel.run(async (ctx) => {
+      const sheets = ctx.workbook.worksheets;
+      sheets.load("items/id");
+      await ctx.sync();
+      for (const ws of sheets.items) {
+        ws.charts.load("items/id,items/name,items/chartType");
+        await ctx.sync();
+        for (const c of ws.charts.items) {
+          facts.push({ id: c.id, name: c.name, chartType: String(c.chartType) });
+        }
+      }
+    });
+    for (const f of facts) {
+      try {
+        await Excel.run(async (ctx) => {
+          const sheets = ctx.workbook.worksheets;
+          sheets.load("items/id");
+          await ctx.sync();
+          for (const ws of sheets.items) {
+            ws.charts.load("items/id");
+            await ctx.sync();
+            const chart = ws.charts.items.find((c) => c.id === f.id);
+            if (!chart) continue;
+            const axis = chart.axes.valueAxis;
+            axis.load("minimum");
+            await ctx.sync();
+            if (typeof axis.minimum === "number") f.axisMin = axis.minimum;
+            return;
+          }
+        });
+      } catch {
+      }
+    }
+    return facts;
+  }
+  async function readSource(record) {
+    let values = null;
+    await Excel.run(async (ctx) => {
+      const sheet = ctx.workbook.worksheets.getItemOrNullObject(record.worksheetId);
+      await ctx.sync();
+      if (sheet.isNullObject) return;
+      const range = sheet.getRange(stripSheet2(record.sourceAddress));
+      range.load("values");
+      await ctx.sync();
+      values = range.values;
+    });
+    return values;
+  }
+  async function checkWorkbook() {
+    const findings = [];
+    const records = loadRecords();
+    let stale = 0;
+    for (const record of records) {
+      if (record.registry_version !== REGISTRY_VERSION) stale++;
+      const values = await readSource(record);
+      if (values === null) {
+        findings.push({
+          severity: "error",
+          message: `"${record.chart} \xB7 ${record.sourceAddress}": its source worksheet no longer exists \u2014 the picture can no longer update.`,
+          recordId: record.id
+        });
+        continue;
+      }
+      const mapped = rangeToDataset(values, record.meta);
+      if (!mapped.dataset) {
+        findings.push({
+          severity: "error",
+          message: `"${record.chart} \xB7 ${record.sourceAddress}": the source no longer parses (${mapped.errors[0] ?? "layout changed"}) \u2014 the chart is frozen at its last good render.`,
+          recordId: record.id,
+          fix: "edit"
+        });
+        continue;
+      }
+      const periods = new Set(mapped.dataset.periods.map((p) => p.trim().toLowerCase()));
+      const orphans = (record.options.comments ?? []).filter((c) => !periods.has(c.period.trim().toLowerCase()));
+      if (orphans.length > 0) {
+        findings.push({
+          severity: "warning",
+          message: `"${record.chart} \xB7 ${record.sourceAddress}": ${orphans.length} comment marker(s) reference periods no longer in the data (${orphans.map((o) => o.period).join(", ")}) \u2014 they are silently dropped from the render.`,
+          recordId: record.id,
+          fix: "edit"
+        });
+      }
+      if (record.options.scale_group && CUMULATIVE_CHARTS.has(record.chart)) {
+        findings.push({
+          severity: "info",
+          message: `"${record.chart} \xB7 ${record.sourceAddress}": waterfalls plot running totals, so this chart keeps its own scale inside group "${record.options.scale_group}" \u2014 a shared level maximum would clip its bars. It still feeds the group's shared maximum.`,
+          recordId: record.id
+        });
+      }
+      if (record.options.scale_group) {
+        const units = groupMembers(records, record.options.scale_group).map((m) => m.meta.unit || "");
+        const input = {
+          chart: record.chart,
+          name: `${record.chart} \xB7 ${record.sourceAddress}`,
+          series: [],
+          scale_group: record.options.scale_group,
+          group_units: units
+        };
+        for (const f of lint(input)) {
+          if (f.rule === "shared-scale-groups") findings.push({ severity: f.severity, message: f.message, recordId: record.id, fix: "edit" });
+        }
+      }
+    }
+    if (stale > 0) {
+      findings.push({
+        severity: "info",
+        message: `${stale} chart(s) predate registry v${REGISTRY_VERSION} \u2014 refresh to re-render them under the current notation.`,
+        fix: "refresh"
+      });
+    }
+    for (const f of await collectNativeCharts()) {
+      const input = {
+        chart: f.chartType,
+        name: f.name,
+        axis: f.axisMin !== void 0 ? { min: f.axisMin } : void 0,
+        series: []
+      };
+      for (const found of lint(input)) {
+        findings.push({
+          severity: found.severity,
+          message: `Native chart ${found.message}`,
+          nativeChartId: f.id,
+          fix: found.rule === "zero-baseline" ? "zero-axis" : void 0
+        });
+      }
+    }
+    const theme = loadWorkbookTheme();
+    const warn = theme ? themeWarning(theme) : null;
+    if (warn) findings.push({ severity: "warning", message: `Theme: ${warn}` });
+    return findings;
+  }
+  async function fixNativeZeroAxis(nativeChartId) {
+    await Excel.run(async (ctx) => {
+      const sheets = ctx.workbook.worksheets;
+      sheets.load("items/id");
+      await ctx.sync();
+      for (const ws of sheets.items) {
+        ws.charts.load("items/id");
+        await ctx.sync();
+        const chart = ws.charts.items.find((c) => c.id === nativeChartId);
+        if (chart) {
+          chart.axes.valueAxis.minimum = 0;
+          await ctx.sync();
+          return;
+        }
+      }
+    });
+  }
+
   // src/taskpane.ts
   var state = { dataset: null, sideways: false, source: null, editing: null };
   var CHART_LABEL = new Map(CHART_CHOICES.map((c) => [c.id, c.label.split(" \u2014 ")[0]]));
@@ -2618,7 +3046,8 @@
           width,
           height,
           comments: options.comments,
-          auto_scale: options.axis?.auto_scale !== false
+          auto_scale: options.axis?.auto_scale !== false,
+          scale_group: $("scale-group").value.trim() || void 0
         },
         registry_version: REGISTRY_VERSION,
         updated: (/* @__PURE__ */ new Date()).toISOString()
@@ -2652,6 +3081,7 @@
       await upsertRecord(record);
       updateLiveCount();
       setStatus(`Inserted ${chart} \u2014 updates automatically from ${state.source.address} ${liveScopeText()}.`);
+      if (record.options.scale_group) void refreshScaleGroup(record.options.scale_group);
     } catch (err) {
       setStatus(err instanceof Error ? err.message : String(err), true);
     }
@@ -2716,6 +3146,22 @@
       row.className = "chart-row" + (state.editing?.id === r.id ? " editing" : "");
       const label = document.createElement("span");
       label.textContent = chartListLabel(r);
+      if (r.registry_version !== REGISTRY_VERSION) {
+        const b = document.createElement("span");
+        b.className = "badge";
+        b.title = `Rendered under registry v${r.registry_version}; current is v${REGISTRY_VERSION}. Refresh to update.`;
+        b.textContent = `v${r.registry_version}`;
+        label.appendChild(document.createTextNode(" "));
+        label.appendChild(b);
+      }
+      if (r.options.scale_group) {
+        const g = document.createElement("span");
+        g.className = "badge group";
+        g.title = "Shares its value scale with the other charts in this group (CH 4.1).";
+        g.textContent = `\u21C4 ${r.options.scale_group}`;
+        label.appendChild(document.createTextNode(" "));
+        label.appendChild(g);
+      }
       const edit = document.createElement("button");
       edit.className = "secondary small";
       edit.textContent = state.editing?.id === r.id ? "Editing\u2026" : "Edit";
@@ -2729,6 +3175,20 @@
       host.appendChild(row);
     }
     $("charts-section").style.display = records.length > 0 ? "" : "none";
+    const list = $("scale-group-list");
+    list.innerHTML = "";
+    for (const g of new Set(records.map((r) => r.options.scale_group).filter(Boolean))) {
+      const opt = document.createElement("option");
+      opt.value = g;
+      list.appendChild(opt);
+    }
+  }
+  async function refreshScaleGroup(group, exceptId) {
+    for (const member of loadRecords()) {
+      if (member.options.scale_group === group && member.id !== exceptId) {
+        await refreshRecord(member, true);
+      }
+    }
   }
   async function showSource(r) {
     try {
@@ -2759,6 +3219,7 @@
     $("good-direction").value = record.meta.good_direction;
     $("comments-input").value = formatCommentLines(record.options.comments);
     $("auto-scale").checked = record.options.auto_scale !== false;
+    $("scale-group").value = record.options.scale_group ?? "";
     highlightThumb();
     try {
       await Excel.run(async (ctx) => {
@@ -2788,6 +3249,7 @@
   }
   function cancelEdit() {
     state.editing = null;
+    $("scale-group").value = "";
     $("insert").textContent = "Insert chart";
     $("edit-banner").style.display = "none";
     renderChartList();
@@ -2806,7 +3268,8 @@
       colour_mode: options.colour_mode ?? "colour",
       show_data_labels: options.show_data_labels ?? false,
       comments: options.comments,
-      auto_scale: options.axis?.auto_scale !== false
+      auto_scale: options.axis?.auto_scale !== false,
+      scale_group: $("scale-group").value.trim() || void 0
     };
     if (chartChanged) {
       try {
@@ -2824,6 +3287,7 @@
       await upsertRecord(record);
       const res = await refreshRecord(record, true, chartChanged ? { width: record.options.width, height: record.options.height } : void 0);
       setStatus(res.ok ? `Updated in place: ${chartListLabel(record)}` : res.message, !res.ok);
+      if (record.options.scale_group) void refreshScaleGroup(record.options.scale_group, record.id);
     } catch (err) {
       setStatus(err instanceof Error ? err.message : String(err), true);
     }
@@ -2880,9 +3344,9 @@
         sheets.load("items/name");
         await ctx.sync();
         const names = new Set(sheets.items.map((w) => w.name));
-        let name = t.sheetName;
-        for (let i = 2; names.has(name); i++) name = `${t.sheetName} (${i})`;
-        const sheet = sheets.add(name);
+        let name2 = t.sheetName;
+        for (let i = 2; names.has(name2); i++) name2 = `${t.sheetName} (${i})`;
+        const sheet = sheets.add(name2);
         const block = sheet.getRangeByIndexes(1, 1, rows, cols);
         block.values = t.grid.map((r) => r.map((c) => c));
         sheet.getRangeByIndexes(1, 1, 1, cols).format.font.bold = true;
@@ -2930,6 +3394,148 @@
       desc.textContent = t.description;
       row.append(button, desc);
       host.appendChild(row);
+    }
+  }
+  function renderFindings(findings) {
+    const host = $("check-results");
+    host.innerHTML = "";
+    if (findings.length === 0) {
+      const ok = document.createElement("div");
+      ok.className = "template-desc";
+      ok.textContent = "No findings \u2014 every chart in this workbook conforms to the registry\u2019s rules.";
+      host.appendChild(ok);
+      return;
+    }
+    for (const f of findings) {
+      const row = document.createElement("div");
+      row.className = "finding";
+      const dot = document.createElement("div");
+      dot.className = `dot ${f.severity}`;
+      const msg = document.createElement("span");
+      msg.textContent = f.message;
+      row.append(dot, msg);
+      if (f.fix === "refresh") {
+        const b = document.createElement("button");
+        b.className = "secondary";
+        b.textContent = "Refresh all";
+        b.addEventListener("click", async () => {
+          setStatus(await refreshAll());
+          void runWorkbookCheck();
+        });
+        row.appendChild(b);
+      } else if (f.fix === "zero-axis" && f.nativeChartId) {
+        const b = document.createElement("button");
+        b.className = "secondary";
+        b.textContent = "Set axis to 0";
+        b.addEventListener("click", async () => {
+          try {
+            await fixNativeZeroAxis(f.nativeChartId);
+            setStatus("Value axis reset to zero. [CH 1.1]");
+            void runWorkbookCheck();
+          } catch (err) {
+            setStatus(err instanceof Error ? err.message : String(err), true);
+          }
+        });
+        row.appendChild(b);
+      } else if (f.fix === "edit" && f.recordId) {
+        const b = document.createElement("button");
+        b.className = "secondary";
+        b.textContent = "Edit";
+        b.addEventListener("click", () => startEdit(f.recordId));
+        row.appendChild(b);
+      }
+      host.appendChild(row);
+    }
+  }
+  var checkInFlight = false;
+  async function runWorkbookCheck() {
+    if (checkInFlight) return;
+    checkInFlight = true;
+    $("check-results").querySelectorAll("button").forEach((b) => b.disabled = true);
+    const btn = $("check-workbook");
+    btn.disabled = true;
+    btn.textContent = "Checking\u2026";
+    try {
+      const findings = await checkWorkbook();
+      renderFindings(findings);
+      const worst = findings.some((f) => f.severity === "error") ? "errors found" : findings.some((f) => f.severity === "warning") ? "warnings found" : findings.length > 0 ? "notes only" : "clean";
+      setStatus(`Workbook check: ${findings.length} finding(s) \u2014 ${worst}.`);
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : String(err), true);
+    } finally {
+      checkInFlight = false;
+      btn.disabled = false;
+      btn.textContent = "Run conformance check \u2014 every chart, with clause citations";
+    }
+  }
+  function assistRecommend() {
+    const out = $("assist-output");
+    out.innerHTML = "";
+    if (!state.dataset) {
+      out.textContent = "Load a selection first \u2014 recommendations read your actual data shape.";
+      return;
+    }
+    for (const rec of recommendCharts(state.dataset)) {
+      const row = document.createElement("div");
+      row.className = "rec-row";
+      const label = document.createElement("span");
+      const nice = CHART_LABEL.get(rec.chart) ?? rec.chart;
+      label.innerHTML = `<b>${nice}</b> \u2014 ${rec.reason}`;
+      const use = document.createElement("button");
+      use.className = "secondary";
+      use.textContent = "Use";
+      use.addEventListener("click", () => {
+        $("chart-type").value = rec.chart;
+        $("chart-type").dispatchEvent(new Event("change"));
+        refreshPreview();
+      });
+      row.append(label, use);
+      out.appendChild(row);
+    }
+  }
+  var lastCommentary = null;
+  function assistCommentary() {
+    const out = $("assist-output");
+    out.innerHTML = "";
+    const insertBtn = $("assist-insert-commentary");
+    insertBtn.style.display = "none";
+    if (!state.dataset) {
+      out.textContent = "Load a selection first \u2014 commentary is drafted from your actual numbers.";
+      return;
+    }
+    const baseline = $("baseline").value;
+    const drafted = draftCommentary(state.dataset, baseline);
+    if (!drafted) {
+      out.textContent = `No ${baseline} baseline in the data \u2014 commentary needs a baseline to compare against.`;
+      return;
+    }
+    lastCommentary = drafted.narrative;
+    out.textContent = drafted.narrative;
+    insertBtn.style.display = "";
+    const existing = parseCommentLines($("comments-input").value);
+    const have = new Set(existing.map((c) => c.period.toLowerCase()));
+    const merged = [...existing, ...drafted.markers.filter((m) => !have.has(m.period.toLowerCase()))];
+    $("comments-input").value = formatCommentLines(merged);
+    refreshPreview();
+  }
+  async function assistInsertCommentary() {
+    if (!lastCommentary || !state.source) return;
+    try {
+      await Excel.run(async (ctx) => {
+        const sheet = ctx.workbook.worksheets.getItemOrNullObject(state.source.worksheetId);
+        await ctx.sync();
+        if (sheet.isNullObject) throw new Error("The source worksheet no longer exists.");
+        const range = sheet.getRange(state.source.address.split("!").pop());
+        range.load(["rowIndex", "columnIndex", "rowCount"]);
+        await ctx.sync();
+        const cell = sheet.getRangeByIndexes(range.rowIndex + range.rowCount + 1, range.columnIndex, 1, 1);
+        cell.values = [[lastCommentary]];
+        cell.format.font.italic = true;
+        await ctx.sync();
+      });
+      setStatus("Commentary written below the data block.");
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : String(err), true);
     }
   }
   Office.onReady((info) => {
@@ -2997,6 +3603,10 @@
       refreshPreview();
       setStatus(await refreshAll());
     });
+    $("check-workbook").addEventListener("click", runWorkbookCheck);
+    $("assist-recommend").addEventListener("click", assistRecommend);
+    $("assist-commentary").addEventListener("click", assistCommentary);
+    $("assist-insert-commentary").addEventListener("click", assistInsertCommentary);
     $("example").addEventListener("click", insertExampleData);
     $("insert-native-table").addEventListener("click", insertNativeTable);
     $("refresh-all").addEventListener("click", async () => {

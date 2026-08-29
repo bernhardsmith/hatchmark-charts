@@ -50,6 +50,16 @@
     .chart-row { display: flex; align-items: center; gap: 6px; padding: 4px 0; border-bottom: 1px solid #f2f2f2; font-size: 11.5px; }
     .chart-row span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
     .chart-row.editing { background: #FFF7DF; }
+    .badge { font-size: 9px; padding: 0 4px; border-radius: 3px; background: #FFF1C9; color: #7A5B00; border: 1px solid #E4CF8B; white-space: nowrap; }
+    .badge.group { background: #E8F0FE; color: #1A4B8F; border-color: #B7CDEB; }
+    .finding { display: flex; gap: 6px; align-items: flex-start; padding: 5px 0; border-bottom: 1px solid #f2f2f2; font-size: 11px; line-height: 1.35; }
+    .finding .dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 3px; flex: none; }
+    .dot.error { background: #B3261E; } .dot.warning { background: #E4A11B; } .dot.info { background: #0066CC; }
+    .finding span { flex: 1; }
+    .finding button { width: auto; margin: 0; padding: 2px 8px; font-size: 10px; }
+    .rec-row { display: flex; gap: 6px; align-items: flex-start; padding: 4px 0; font-size: 11px; }
+    .rec-row span { flex: 1; }
+    .rec-row button { width: auto; margin: 0; padding: 2px 8px; font-size: 10px; }
     .template-row { margin: 8px 0; }
     .template-desc { font-size: 10.5px; color: #666; margin-top: 3px; line-height: 1.35; }
     .theme-buttons { display: flex; gap: 6px; }
@@ -119,6 +129,10 @@
     <label for="auto-scale" style="margin:0">Auto-scale big numbers (K, M, bn)</label>
   </div>
 
+  <label for="scale-group">Scale group (optional) — charts in one group share a single value scale</label>
+  <input type="text" id="scale-group" list="scale-group-list" placeholder="e.g. regions" />
+  <datalist id="scale-group-list"></datalist>
+
   <details>
     <summary>Comment markers</summary>
     <label for="comments-input">One per line — <code>Period: text</code> (e.g. <code>Mar: Rollout pulled forward</code>)</label>
@@ -130,6 +144,18 @@
   <div id="preview"></div>
   <div id="edit-banner" class="edit-banner" style="display:none">Editing <b id="edit-what"></b> — changes apply to the existing picture. <button id="edit-cancel" class="linkish">Cancel</button></div>
   <button id="insert" disabled>Insert chart</button>
+
+  <details>
+    <summary>Assist</summary>
+    <div class="theme-buttons">
+      <button id="assist-recommend" class="secondary small">Suggest chart type</button>
+      <button id="assist-commentary" class="secondary small">Draft commentary</button>
+    </div>
+    <div id="assist-output" class="template-desc"></div>
+    <button id="assist-insert-commentary" class="secondary small" style="display:none">Write commentary under the data</button>
+    <div class="template-desc">Recommendations and commentary are computed from your loaded data with the registry's own guidance — nothing leaves Excel.</div>
+  </details>
+
   <button id="insert-native-table" class="secondary" disabled>Insert native Excel table — live formulas, no add-in needed to view</button>
   <div id="status" class="status"></div>
 
@@ -147,6 +173,12 @@
       <label for="auto-open" style="margin:0">Reopen this pane automatically when this workbook opens</label>
     </div>
   </div>
+
+  <details id="check-section">
+    <summary>Check this workbook</summary>
+    <button id="check-workbook" class="secondary">Run conformance check — every chart, with clause citations</button>
+    <div id="check-results"></div>
+  </details>
 
   <div id="charts-section" style="display:none">
     <details open>
