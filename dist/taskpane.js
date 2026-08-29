@@ -1693,6 +1693,11 @@
     await persist(records);
     return records;
   }
+  async function removeRecord(id) {
+    const records = loadRecords().filter((r) => r.id !== id);
+    await persist(records);
+    return records;
+  }
   function chartsAffectedBy(records, worksheetId, changedAddress) {
     return records.filter(
       (r) => r.worksheetId === worksheetId && addressesIntersect(stripSheet(r.sourceAddress), stripSheet(changedAddress))
@@ -1760,6 +1765,7 @@
     if (!rendered.svg) return { ok: false, message: `${record.shapeName}: ${rendered.errors.join(" ")}` };
     const png = await svgToPngBase64(rendered.svg, record.options.width, record.options.height);
     let structuralChange = false;
+    let orphaned = false;
     await Excel.run(async (ctx) => {
       const sheets = ctx.workbook.worksheets;
       sheets.load("items/id");
@@ -1783,12 +1789,16 @@
           break;
         }
       }
-      const target = hostSheet ?? ctx.workbook.worksheets.getItem(record.worksheetId);
+      if (!hostSheet) {
+        orphaned = true;
+        return;
+      }
+      const target = hostSheet;
       const shape = target.shapes.addImage(png);
-      shape.left = geometry?.left ?? 0;
-      shape.top = geometry?.top ?? 0;
-      shape.width = geometry?.width ?? record.options.width;
-      shape.height = geometry?.height ?? record.options.height;
+      shape.left = geometry.left;
+      shape.top = geometry.top;
+      shape.width = geometry.width;
+      shape.height = geometry.height;
       shape.name = record.shapeName;
       shape.altTextDescription = altText(record);
       if (!selection.address.includes(",")) {
@@ -1802,6 +1812,10 @@
         structuralChange = true;
       }
     });
+    if (orphaned) {
+      await removeRecord(record.id);
+      return { ok: true, message: `${record.chart}: its picture was deleted, so it is no longer tracked (${record.sourceAddress})` };
+    }
     if (structuralChange) await upsertRecord(record);
     return { ok: true, message: `${record.chart} refreshed from ${record.sourceAddress}` };
   }
