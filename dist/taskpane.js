@@ -1445,6 +1445,107 @@
     return svgRoot(layout, "", content, `hatchmark${options.version ? ` v${options.version}` : ""} variance-table`, options.theme?.font_family);
   }
 
+  // node_modules/hatchmark/src/render/dataTable.ts
+  var ROW_H2 = 11;
+  var HEADER_H2 = 12;
+  var CELL_FS = 6.5;
+  function renderDataTable(dataset, options = {}, chartId = "time-series-table") {
+    const decimals = options.axis?.decimals ?? 0;
+    const rows = dataset.series.map((s) => ({
+      label: s.label ?? s.scenario,
+      scenario: s.label ? null : s.scenario,
+      values: s.values
+    }));
+    const nCols = dataset.periods.length;
+    const rowTotal = (r) => r.values.some((v) => v !== null) ? r.values.reduce((a, v) => a + (v ?? 0), 0) : null;
+    const oneScenario = new Set(dataset.series.map((s) => s.scenario)).size === 1;
+    const showTotalRow = rows.length > 1 && oneScenario;
+    const columnTotals = dataset.periods.map(
+      (_, c) => rows.some((r) => r.values[c] !== null) ? rows.reduce((a, r) => a + (r.values[c] ?? 0), 0) : null
+    );
+    const grandTotal = columnTotals.some((v) => v !== null) ? columnTotals.reduce((a, v) => a + (v ?? 0), 0) : null;
+    const bodyValues = rows.flatMap((r) => r.values.filter((v) => v !== null));
+    const axis = { min: 0, max: 1, ticks: 0, decimals, prefix: options.axis?.prefix ?? "", suffix: options.axis?.suffix ?? "", label: options.axis?.label ?? dataset.unit };
+    const fmt2 = makeFormatter(bodyValues, axis, options.axis?.auto_scale !== false);
+    const TABLE_CHAR_W = 0.62;
+    const chipW = rows.some((r) => r.scenario) ? 7 : 0;
+    const wLabel = Math.max(26, chipW + 4 + Math.max(0, ...rows.map((r) => r.label.length)) * CELL_FS * TABLE_CHAR_W);
+    const cellTexts = [
+      ...rows.flatMap((r) => r.values.map((v) => v === null ? "" : fmt2.plain(v))),
+      ...columnTotals.map((v) => v === null ? "" : fmt2.plain(v)),
+      grandTotal === null ? "" : fmt2.plain(grandTotal)
+    ];
+    const wNum = Math.max(
+      20,
+      Math.max(0, ...cellTexts.map((t) => t.length)) * CELL_FS * TABLE_CHAR_W + 7,
+      Math.max(0, ...dataset.periods.map((t) => t.length)) * 7 * TABLE_CHAR_W + 7
+    );
+    const totalGap = 3;
+    const bodyRows = rows.length + (showTotalRow ? 1 : 0);
+    const contentW = wLabel + nCols * wNum + totalGap + wNum + 2;
+    const contentH = HEADER_H2 + bodyRows * ROW_H2 + 2;
+    const width = options.width ?? Math.max(200, contentW + 42);
+    const height = options.height ?? Math.max(100, contentH + 66);
+    const title = resolveTitle(dataset, options);
+    const layout = computeLayout(width, height, title, false, "", 0);
+    const tableScale = Math.min(1, layout.plotW / contentW, layout.plotH / contentH);
+    const xLabel = 0;
+    const xValueRight = (c) => wLabel + (c + 1) * wNum;
+    const xTotalRight = wLabel + nCols * wNum + totalGap + wNum;
+    const parts = [];
+    const headY = HEADER_H2 - 3;
+    const th = (x, label, anchor = "end") => text({ x, y: headY, "font-size": 7, "font-weight": 600, fill: COLOR.measuredDark, "text-anchor": anchor }, label);
+    dataset.periods.forEach((p, c) => parts.push(th(xValueRight(c), p)));
+    parts.push(th(xTotalRight, "\u03A3"));
+    parts.push(el("line", { x1: 0, y1: HEADER_H2, x2: layout.plotW, y2: HEADER_H2, stroke: STYLE.axisColor, "stroke-width": 0.75 }));
+    const usedHatch = /* @__PURE__ */ new Map();
+    const prefix = options.id_prefix ?? `hm-${dataset.id}-dtable`;
+    const drawRow = (label, scenario, values, rTotal, rowIdx, isTotal) => {
+      const y = HEADER_H2 + rowIdx * ROW_H2;
+      const baseY = y + ROW_H2 - 3;
+      const weight = isTotal ? 700 : 400;
+      if (isTotal) parts.push(el("line", { x1: 0, y1: y, x2: layout.plotW, y2: y, stroke: STYLE.axisColor, "stroke-width": 0.5 }));
+      else if (rowIdx > 0) parts.push(el("line", { x1: 0, y1: y, x2: layout.plotW, y2: y, stroke: STYLE.gridlineColor, "stroke-width": 0.25 }));
+      let labelX = xLabel;
+      if (scenario) {
+        const chipY = baseY - 4.6;
+        const treatment = scenarioFill(scenario);
+        const color = scenarioColor(scenario);
+        if (treatment === "hatched") {
+          if (!usedHatch.has(color)) usedHatch.set(color, `${prefix}-hatch-${usedHatch.size}`);
+          parts.push(el("rect", { x: labelX, y: chipY, width: 5, height: 5, fill: `url(#${usedHatch.get(color)})`, stroke: color, "stroke-width": 0.5 }));
+        } else if (treatment === "outlined") {
+          parts.push(el("rect", { x: labelX, y: chipY, width: 5, height: 5, fill: COLOR.background, stroke: COLOR.outlineStroke, "stroke-width": 0.6 }));
+        } else {
+          parts.push(el("rect", { x: labelX, y: chipY, width: 5, height: 5, fill: color }));
+        }
+        labelX += 7;
+      }
+      parts.push(text({ x: labelX, y: baseY, "font-size": CELL_FS, "font-weight": weight, fill: COLOR.measuredDark }, label));
+      values.forEach((v, c) => {
+        if (v === null) return;
+        parts.push(text({ x: xValueRight(c), y: baseY, "font-size": CELL_FS, "font-weight": weight, fill: COLOR.measuredDark, "text-anchor": "end" }, fmt2.plain(v)));
+      });
+      if (rTotal !== null) {
+        parts.push(text({ x: xTotalRight, y: baseY, "font-size": CELL_FS, "font-weight": 700, fill: COLOR.measuredDark, "text-anchor": "end" }, fmt2.plain(rTotal)));
+      }
+    };
+    rows.forEach((r, i) => drawRow(r.label, r.scenario, r.values, rowTotal(r), i, false));
+    if (showTotalRow) {
+      drawRow("\u03A3", null, columnTotals, grandTotal, rows.length, true);
+    }
+    const closeY = HEADER_H2 + bodyRows * ROW_H2 + 1;
+    parts.push(el("line", { x1: 0, y1: closeY, x2: layout.plotW, y2: closeY, stroke: STYLE.axisColor, "stroke-width": 0.75 }));
+    const unitNote = text(
+      { x: layout.padLeft + layout.plotW, y: layout.titleH + FS.axisUnit, "font-size": FS.axisUnit, fill: STYLE.axisColor, "text-anchor": "end" },
+      axis.label + (fmt2.suffix ? ` (${fmt2.suffix})` : "")
+    );
+    const defs = [...usedHatch.entries()].map(([color, id]) => hatchPattern(id, color)).join("");
+    const content = titleBlock(layout) + unitNote + `<g transform="translate(${layout.padLeft},${layout.padTop})${tableScale < 1 ? ` scale(${Number(tableScale.toFixed(4))})` : ""}">${parts.join("")}</g>`;
+    const desc = `hatchmark${options.version ? ` v${options.version}` : ""} ${chartId}`;
+    return svgRoot(layout, defs, content, desc, options.theme?.font_family);
+  }
+
   // node_modules/hatchmark/src/render/index.ts
   function renderChart(chart, dataset, options = {}) {
     switch (chart) {
@@ -1474,6 +1575,10 @@
         return renderColumnWithVariance(dataset, options);
       case "variance-table":
         return renderVarianceTable(dataset, options);
+      case "time-series-table":
+        return renderDataTable(dataset, options, "time-series-table");
+      case "cross-table":
+        return renderDataTable(dataset, options, "cross-table");
       default: {
         const never = chart;
         throw new Error(`Unknown chart type: ${String(never)}`);
@@ -1799,7 +1904,7 @@
   }
 
   // src/liveCharts.ts
-  var REGISTRY_VERSION = "0.3.1";
+  var REGISTRY_VERSION = "0.4.0";
   var SETTINGS_KEY = "hatchmark-live-charts";
   var THEME_KEY = "hatchmark-theme";
   function newRecordId() {
@@ -1888,6 +1993,15 @@
     if (lastValues.get(recordId) === key) return false;
     lastValues.set(recordId, key);
     return true;
+  }
+  function protectShape(shape) {
+    shape.lockAspectRatio = true;
+    try {
+      if (Office.context.requirements.isSetSupported("ExcelApi", "1.10")) {
+        shape.placement = Excel.Placement.oneCell;
+      }
+    } catch {
+    }
   }
   function altText(record) {
     return `hatchmark v${REGISTRY_VERSION} ${record.chart} \u2014 live from ${record.sourceAddress}`;
@@ -2006,8 +2120,10 @@
       const shape = target.shapes.addImage(png);
       shape.left = geometry.left;
       shape.top = geometry.top;
-      shape.width = resize?.width ?? geometry.width;
-      shape.height = resize?.height ?? geometry.height;
+      const healWidth = resize?.width ?? geometry.width;
+      shape.width = healWidth;
+      shape.height = resize?.height ?? healWidth * (record.options.height / record.options.width);
+      protectShape(shape);
       shape.name = record.shapeName;
       shape.altTextDescription = altText(record);
       shape.altTextTitle = encodeRecord(record);
@@ -2145,6 +2261,18 @@
       "id": "variance-table",
       "label": "Variance table \u2014 AC \xB7 PL \xB7 \u0394PL \xB7 \u0394PL%",
       "svg": `<svg xmlns="http://www.w3.org/2000/svg" width="260" height="160" viewBox="0 0 260 160" font-family="'Barlow', sans-serif"><desc>hatchmark variance-table</desc><rect x="0" y="0" width="260" height="160" fill="#FFFFFF"/><text x="0" y="7.5" font-size="7.5" fill="#333333"><tspan x="0" dy="0">Alpha Corporation</tspan><tspan x="0" dy="10"><tspan font-weight="600">Net sales \u0394PL </tspan>in mEUR</tspan><tspan x="0" dy="10">2026 AC&amp;FC and PL</tspan></text><text x="254" y="43.5" font-size="7.5" fill="#333333" text-anchor="end">mEUR</text><g transform="translate(2,36)"><text x="65.28" y="9" font-size="7" font-weight="600" fill="#333333" text-anchor="end">AC</text><text x="100.56" y="9" font-size="7" font-weight="600" fill="#333333" text-anchor="end">PL</text><text x="134.63" y="9" font-size="7" font-weight="600" fill="#333333" text-anchor="end">\u0394PL</text><text x="210.35" y="9" font-size="7" font-weight="600" fill="#333333" text-anchor="end">\u0394PL%</text><line x1="0" y1="12" x2="252" y2="12" stroke="#333333" stroke-width="0.75"/><text x="28" y="20" font-size="7" font-weight="400" fill="#333333" text-anchor="end">Jan</text><text x="65.28" y="20" font-size="7" font-weight="400" fill="#333333" text-anchor="end">57</text><text x="100.56" y="20" font-size="7" font-weight="400" fill="#333333" text-anchor="end">60</text><text x="134.63" y="20" font-size="7" font-weight="400" fill="#E2001A" text-anchor="end">\u22123</text><rect x="155.97" y="14.5" width="1.49" height="5" fill="#E2001A"/><line x1="157.46" y1="13" x2="157.46" y2="21" stroke="#333333" stroke-width="0.5"/><text x="210.35" y="20" font-size="7" font-weight="400" fill="#E2001A" text-anchor="end">\u22125%</text><line x1="233.18" y1="16.5" x2="227.19" y2="16.5" stroke="#E2001A" stroke-width="1.6"/><rect x="225.69" y="15" width="3" height="3" fill="#333333"/><line x1="233.18" y1="13" x2="233.18" y2="21" stroke="#333333" stroke-width="0.5"/><text x="28" y="31" font-size="7" font-weight="400" fill="#333333" text-anchor="end">Feb</text><text x="65.28" y="31" font-size="7" font-weight="400" fill="#333333" text-anchor="end">63</text><text x="100.56" y="31" font-size="7" font-weight="400" fill="#333333" text-anchor="end">60</text><text x="134.63" y="31" font-size="7" font-weight="400" fill="#89B54A" text-anchor="end">+3</text><rect x="157.46" y="25.5" width="1.49" height="5" fill="#89B54A"/><line x1="157.46" y1="24" x2="157.46" y2="32" stroke="#333333" stroke-width="0.5"/><text x="210.35" y="31" font-size="7" font-weight="400" fill="#89B54A" text-anchor="end">+5%</text><line x1="233.18" y1="27.5" x2="239.17" y2="27.5" stroke="#89B54A" stroke-width="1.6"/><rect x="237.67" y="26" width="3" height="3" fill="#333333"/><line x1="233.18" y1="24" x2="233.18" y2="32" stroke="#333333" stroke-width="0.5"/><text x="28" y="42" font-size="7" font-weight="400" fill="#333333" text-anchor="end">Mar</text><text x="65.28" y="42" font-size="7" font-weight="400" fill="#333333" text-anchor="end">58</text><text x="100.56" y="42" font-size="7" font-weight="400" fill="#333333" text-anchor="end">62</text><text x="134.63" y="42" font-size="7" font-weight="400" fill="#E2001A" text-anchor="end">\u22124</text><rect x="155.48" y="36.5" width="1.98" height="5" fill="#E2001A"/><line x1="157.46" y1="35" x2="157.46" y2="43" stroke="#333333" stroke-width="0.5"/><text x="210.35" y="42" font-size="7" font-weight="400" fill="#E2001A" text-anchor="end">\u22126%</text><line x1="233.18" y1="38.5" x2="225.45" y2="38.5" stroke="#E2001A" stroke-width="1.6"/><rect x="223.95" y="37" width="3" height="3" fill="#333333"/><line x1="233.18" y1="35" x2="233.18" y2="43" stroke="#333333" stroke-width="0.5"/><text x="28" y="53" font-size="7" font-weight="400" fill="#333333" text-anchor="end">Apr</text><text x="65.28" y="53" font-size="7" font-weight="400" fill="#333333" text-anchor="end">64</text><text x="100.56" y="53" font-size="7" font-weight="400" fill="#333333" text-anchor="end">62</text><text x="134.63" y="53" font-size="7" font-weight="400" fill="#89B54A" text-anchor="end">+2</text><rect x="157.46" y="47.5" width="0.99" height="5" fill="#89B54A"/><line x1="157.46" y1="46" x2="157.46" y2="54" stroke="#333333" stroke-width="0.5"/><text x="210.35" y="53" font-size="7" font-weight="400" fill="#89B54A" text-anchor="end">+3%</text><line x1="233.18" y1="49.5" x2="237.04" y2="49.5" stroke="#89B54A" stroke-width="1.6"/><rect x="235.54" y="48" width="3" height="3" fill="#333333"/><line x1="233.18" y1="46" x2="233.18" y2="54" stroke="#333333" stroke-width="0.5"/><text x="28" y="64" font-size="7" font-weight="400" fill="#333333" text-anchor="end">May</text><text x="65.28" y="64" font-size="7" font-weight="400" fill="#333333" text-anchor="end">69</text><text x="100.56" y="64" font-size="7" font-weight="400" fill="#333333" text-anchor="end">64</text><text x="134.63" y="64" font-size="7" font-weight="400" fill="#89B54A" text-anchor="end">+5</text><rect x="157.46" y="58.5" width="2.48" height="5" fill="#89B54A"/><line x1="157.46" y1="57" x2="157.46" y2="65" stroke="#333333" stroke-width="0.5"/><text x="210.35" y="64" font-size="7" font-weight="400" fill="#89B54A" text-anchor="end">+8%</text><line x1="233.18" y1="60.5" x2="242.54" y2="60.5" stroke="#89B54A" stroke-width="1.6"/><rect x="241.04" y="59" width="3" height="3" fill="#333333"/><line x1="233.18" y1="57" x2="233.18" y2="65" stroke="#333333" stroke-width="0.5"/><text x="28" y="75" font-size="7" font-weight="400" fill="#333333" text-anchor="end">Jun</text><text x="65.28" y="75" font-size="7" font-weight="400" fill="#333333" text-anchor="end">71</text><text x="100.56" y="75" font-size="7" font-weight="400" fill="#333333" text-anchor="end">64</text><text x="134.63" y="75" font-size="7" font-weight="400" fill="#89B54A" text-anchor="end">+7</text><rect x="157.46" y="69.5" width="3.47" height="5" fill="#89B54A"/><line x1="157.46" y1="68" x2="157.46" y2="76" stroke="#333333" stroke-width="0.5"/><text x="210.35" y="75" font-size="7" font-weight="400" fill="#89B54A" text-anchor="end">+11%</text><line x1="233.18" y1="71.5" x2="246.28" y2="71.5" stroke="#89B54A" stroke-width="1.6"/><rect x="244.78" y="70" width="3" height="3" fill="#333333"/><line x1="233.18" y1="68" x2="233.18" y2="76" stroke="#333333" stroke-width="0.5"/><text x="28" y="86" font-size="7" font-weight="400" fill="#333333" text-anchor="end">Jul</text><text x="65.28" y="86" font-size="7" font-weight="400" fill="#333333" text-anchor="end">68</text><text x="100.56" y="86" font-size="7" font-weight="400" fill="#333333" text-anchor="end">66</text><text x="134.63" y="86" font-size="7" font-weight="400" fill="#89B54A" text-anchor="end">+2</text><rect x="157.46" y="80.5" width="0.99" height="5" fill="#89B54A"/><line x1="157.46" y1="79" x2="157.46" y2="87" stroke="#333333" stroke-width="0.5"/><text x="210.35" y="86" font-size="7" font-weight="400" fill="#89B54A" text-anchor="end">+3%</text><line x1="233.18" y1="82.5" x2="236.81" y2="82.5" stroke="#89B54A" stroke-width="1.6"/><rect x="235.31" y="81" width="3" height="3" fill="#333333"/><line x1="233.18" y1="79" x2="233.18" y2="87" stroke="#333333" stroke-width="0.5"/><text x="28" y="97" font-size="7" font-weight="400" fill="#333333" text-anchor="end">Aug</text><text x="65.28" y="97" font-size="7" font-weight="400" fill="#333333" text-anchor="end">66</text><text x="100.56" y="97" font-size="7" font-weight="400" fill="#333333" text-anchor="end">66</text><text x="134.63" y="97" font-size="7" font-weight="400" fill="#0066CC" text-anchor="end">0</text><rect x="157.46" y="91.5" width="0.5" height="5" fill="#0066CC"/><line x1="157.46" y1="90" x2="157.46" y2="98" stroke="#333333" stroke-width="0.5"/><text x="210.35" y="97" font-size="7" font-weight="400" fill="#0066CC" text-anchor="end">0%</text><line x1="233.18" y1="93.5" x2="233.18" y2="93.5" stroke="#0066CC" stroke-width="1.6"/><rect x="231.68" y="92" width="3" height="3" fill="#333333"/><line x1="233.18" y1="90" x2="233.18" y2="98" stroke="#333333" stroke-width="0.5"/><text x="28" y="108" font-size="7" font-weight="400" fill="#333333" text-anchor="end">Sep</text><text x="65.28" y="108" font-size="7" font-weight="400" fill="#333333" text-anchor="end">72</text><text x="100.56" y="108" font-size="7" font-weight="400" fill="#333333" text-anchor="end">68</text><text x="134.63" y="108" font-size="7" font-weight="400" fill="#89B54A" text-anchor="end">+4</text><rect x="157.46" y="102.5" width="1.98" height="5" fill="#89B54A"/><line x1="157.46" y1="101" x2="157.46" y2="109" stroke="#333333" stroke-width="0.5"/><text x="210.35" y="108" font-size="7" font-weight="400" fill="#89B54A" text-anchor="end">+6%</text><line x1="233.18" y1="104.5" x2="240.22" y2="104.5" stroke="#89B54A" stroke-width="1.6"/><rect x="238.72" y="103" width="3" height="3" fill="#333333"/><line x1="233.18" y1="101" x2="233.18" y2="109" stroke="#333333" stroke-width="0.5"/><text x="28" y="119" font-size="7" font-weight="400" fill="#333333" text-anchor="end">Oct</text><text x="65.28" y="119" font-size="7" font-weight="400" fill="#333333" text-anchor="end">75</text><text x="100.56" y="119" font-size="7" font-weight="400" fill="#333333" text-anchor="end">68</text><text x="134.63" y="119" font-size="7" font-weight="400" fill="#89B54A" text-anchor="end">+7</text><rect x="157.46" y="113.5" width="3.47" height="5" fill="#89B54A"/><line x1="157.46" y1="112" x2="157.46" y2="120" stroke="#333333" stroke-width="0.5"/><text x="210.35" y="119" font-size="7" font-weight="400" fill="#89B54A" text-anchor="end">+10%</text><line x1="233.18" y1="115.5" x2="245.51" y2="115.5" stroke="#89B54A" stroke-width="1.6"/><rect x="244.01" y="114" width="3" height="3" fill="#333333"/><line x1="233.18" y1="112" x2="233.18" y2="120" stroke="#333333" stroke-width="0.5"/><text x="28" y="130" font-size="7" font-weight="400" fill="#333333" text-anchor="end">Nov</text><text x="65.28" y="130" font-size="7" font-weight="400" fill="#333333" text-anchor="end">74</text><text x="100.56" y="130" font-size="7" font-weight="400" fill="#333333" text-anchor="end">70</text><text x="134.63" y="130" font-size="7" font-weight="400" fill="#89B54A" text-anchor="end">+4</text><rect x="157.46" y="124.5" width="1.98" height="5" fill="#89B54A"/><line x1="157.46" y1="123" x2="157.46" y2="131" stroke="#333333" stroke-width="0.5"/><text x="210.35" y="130" font-size="7" font-weight="400" fill="#89B54A" text-anchor="end">+6%</text><line x1="233.18" y1="126.5" x2="240.02" y2="126.5" stroke="#89B54A" stroke-width="1.6"/><rect x="238.52" y="125" width="3" height="3" fill="#333333"/><line x1="233.18" y1="123" x2="233.18" y2="131" stroke="#333333" stroke-width="0.5"/><text x="28" y="141" font-size="7" font-weight="400" fill="#333333" text-anchor="end">Dec</text><text x="65.28" y="141" font-size="7" font-weight="400" fill="#333333" text-anchor="end">81</text><text x="100.56" y="141" font-size="7" font-weight="400" fill="#333333" text-anchor="end">70</text><text x="134.63" y="141" font-size="7" font-weight="400" fill="#89B54A" text-anchor="end">+11</text><rect x="157.46" y="135.5" width="5.45" height="5" fill="#89B54A"/><line x1="157.46" y1="134" x2="157.46" y2="142" stroke="#333333" stroke-width="0.5"/><text x="210.35" y="141" font-size="7" font-weight="400" fill="#89B54A" text-anchor="end">+16%</text><line x1="233.18" y1="137.5" x2="252" y2="137.5" stroke="#89B54A" stroke-width="1.6"/><rect x="250.5" y="136" width="3" height="3" fill="#333333"/><line x1="233.18" y1="134" x2="233.18" y2="142" stroke="#333333" stroke-width="0.5"/><line x1="0" y1="144" x2="252" y2="144" stroke="#333333" stroke-width="0.5"/><text x="28" y="152" font-size="7" font-weight="600" fill="#333333" text-anchor="end">\u03A3</text><text x="65.28" y="152" font-size="7" font-weight="600" fill="#333333" text-anchor="end">818</text><text x="100.56" y="152" font-size="7" font-weight="600" fill="#333333" text-anchor="end">780</text><text x="134.63" y="152" font-size="7" font-weight="600" fill="#89B54A" text-anchor="end">+38</text><rect x="157.46" y="146.5" width="18.82" height="5" fill="#89B54A"/><line x1="157.46" y1="145" x2="157.46" y2="153" stroke="#333333" stroke-width="0.5"/><text x="210.35" y="152" font-size="7" font-weight="600" fill="#89B54A" text-anchor="end">+5%</text><line x1="233.18" y1="148.5" x2="239.01" y2="148.5" stroke="#89B54A" stroke-width="1.6"/><rect x="237.51" y="147" width="3" height="3" fill="#333333"/><line x1="233.18" y1="145" x2="233.18" y2="153" stroke="#333333" stroke-width="0.5"/><line x1="0" y1="156" x2="252" y2="156" stroke="#333333" stroke-width="0.75"/></g></svg>`
+    },
+    {
+      "group": "Grids & tables (pictures)",
+      "id": "time-series-table",
+      "label": "Time series table \u2014 periods across, rows down",
+      "svg": `<svg xmlns="http://www.w3.org/2000/svg" width="260" height="160" viewBox="0 0 260 160" font-family="'Barlow', sans-serif"><desc>hatchmark time-series-table</desc><rect x="0" y="0" width="260" height="160" fill="#FFFFFF"/><text x="0" y="7.5" font-size="7.5" fill="#333333"><tspan x="0" dy="0">Alpha Corporation</tspan><tspan x="0" dy="10"><tspan font-weight="600">Net sales </tspan>in mEUR</tspan><tspan x="0" dy="10">2026 AC</tspan></text><text x="254" y="43.5" font-size="7.5" fill="#333333" text-anchor="end">mEUR</text><g transform="translate(2,36)"><text x="46.02" y="9" font-size="7" font-weight="600" fill="#333333" text-anchor="end">Jan</text><text x="66.04" y="9" font-size="7" font-weight="600" fill="#333333" text-anchor="end">Feb</text><text x="86.06" y="9" font-size="7" font-weight="600" fill="#333333" text-anchor="end">Mar</text><text x="106.08" y="9" font-size="7" font-weight="600" fill="#333333" text-anchor="end">Apr</text><text x="126.1" y="9" font-size="7" font-weight="600" fill="#333333" text-anchor="end">May</text><text x="146.12" y="9" font-size="7" font-weight="600" fill="#333333" text-anchor="end">Jun</text><text x="169.14" y="9" font-size="7" font-weight="600" fill="#333333" text-anchor="end">\u03A3</text><line x1="0" y1="12" x2="252" y2="12" stroke="#333333" stroke-width="0.75"/><text x="0" y="20" font-size="6.5" font-weight="400" fill="#333333">North</text><text x="46.02" y="20" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">21</text><text x="66.04" y="20" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">24</text><text x="86.06" y="20" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">22</text><text x="106.08" y="20" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">26</text><text x="126.1" y="20" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">27</text><text x="146.12" y="20" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">29</text><text x="169.14" y="20" font-size="6.5" font-weight="700" fill="#333333" text-anchor="end">149</text><line x1="0" y1="23" x2="252" y2="23" stroke="#E5E7EB" stroke-width="0.25"/><text x="0" y="31" font-size="6.5" font-weight="400" fill="#333333">South</text><text x="46.02" y="31" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">14</text><text x="66.04" y="31" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">13</text><text x="86.06" y="31" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">15</text><text x="106.08" y="31" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">14</text><text x="126.1" y="31" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">16</text><text x="146.12" y="31" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">15</text><text x="169.14" y="31" font-size="6.5" font-weight="700" fill="#333333" text-anchor="end">87</text><line x1="0" y1="34" x2="252" y2="34" stroke="#E5E7EB" stroke-width="0.25"/><text x="0" y="42" font-size="6.5" font-weight="400" fill="#333333">East</text><text x="46.02" y="42" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">9</text><text x="66.04" y="42" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">10</text><text x="86.06" y="42" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">12</text><text x="106.08" y="42" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">11</text><text x="126.1" y="42" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">13</text><text x="146.12" y="42" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">14</text><text x="169.14" y="42" font-size="6.5" font-weight="700" fill="#333333" text-anchor="end">69</text><line x1="0" y1="45" x2="252" y2="45" stroke="#E5E7EB" stroke-width="0.25"/><text x="0" y="53" font-size="6.5" font-weight="400" fill="#333333">West</text><text x="46.02" y="53" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">13</text><text x="66.04" y="53" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">16</text><text x="86.06" y="53" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">9</text><text x="106.08" y="53" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">18</text><text x="126.1" y="53" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">13</text><text x="146.12" y="53" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">13</text><text x="169.14" y="53" font-size="6.5" font-weight="700" fill="#333333" text-anchor="end">82</text><line x1="0" y1="56" x2="252" y2="56" stroke="#333333" stroke-width="0.5"/><text x="0" y="64" font-size="6.5" font-weight="700" fill="#333333">\u03A3</text><text x="46.02" y="64" font-size="6.5" font-weight="700" fill="#333333" text-anchor="end">57</text><text x="66.04" y="64" font-size="6.5" font-weight="700" fill="#333333" text-anchor="end">63</text><text x="86.06" y="64" font-size="6.5" font-weight="700" fill="#333333" text-anchor="end">58</text><text x="106.08" y="64" font-size="6.5" font-weight="700" fill="#333333" text-anchor="end">69</text><text x="126.1" y="64" font-size="6.5" font-weight="700" fill="#333333" text-anchor="end">69</text><text x="146.12" y="64" font-size="6.5" font-weight="700" fill="#333333" text-anchor="end">71</text><text x="169.14" y="64" font-size="6.5" font-weight="700" fill="#333333" text-anchor="end">387</text><line x1="0" y1="68" x2="252" y2="68" stroke="#333333" stroke-width="0.75"/></g></svg>`
+    },
+    {
+      "group": "Grids & tables (pictures)",
+      "id": "cross-table",
+      "label": "Cross table \u2014 structure \xD7 structure",
+      "svg": `<svg xmlns="http://www.w3.org/2000/svg" width="260" height="160" viewBox="0 0 260 160" font-family="'Barlow', sans-serif"><desc>hatchmark cross-table</desc><rect x="0" y="0" width="260" height="160" fill="#FFFFFF"/><text x="0" y="7.5" font-size="7.5" fill="#333333"><tspan x="0" dy="0">Alpha Corporation</tspan><tspan x="0" dy="10"><tspan font-weight="600">Net sales </tspan>in mEUR</tspan><tspan x="0" dy="10">2026 AC</tspan></text><text x="254" y="43.5" font-size="7.5" fill="#333333" text-anchor="end">mEUR</text><g transform="translate(2,36)"><text x="67.72" y="9" font-size="7" font-weight="600" fill="#333333" text-anchor="end">Espresso</text><text x="109.44" y="9" font-size="7" font-weight="600" fill="#333333" text-anchor="end">Grinders</text><text x="151.16" y="9" font-size="7" font-weight="600" fill="#333333" text-anchor="end">Filter</text><text x="192.88" y="9" font-size="7" font-weight="600" fill="#333333" text-anchor="end">Parts</text><text x="237.6" y="9" font-size="7" font-weight="600" fill="#333333" text-anchor="end">\u03A3</text><line x1="0" y1="12" x2="252" y2="12" stroke="#333333" stroke-width="0.75"/><text x="0" y="20" font-size="6.5" font-weight="400" fill="#333333">North</text><text x="67.72" y="20" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">38</text><text x="109.44" y="20" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">21</text><text x="151.16" y="20" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">14</text><text x="192.88" y="20" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">13</text><text x="237.6" y="20" font-size="6.5" font-weight="700" fill="#333333" text-anchor="end">86</text><line x1="0" y1="23" x2="252" y2="23" stroke="#E5E7EB" stroke-width="0.25"/><text x="0" y="31" font-size="6.5" font-weight="400" fill="#333333">South</text><text x="67.72" y="31" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">26</text><text x="109.44" y="31" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">15</text><text x="151.16" y="31" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">12</text><text x="192.88" y="31" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">11</text><text x="237.6" y="31" font-size="6.5" font-weight="700" fill="#333333" text-anchor="end">64</text><line x1="0" y1="34" x2="252" y2="34" stroke="#E5E7EB" stroke-width="0.25"/><text x="0" y="42" font-size="6.5" font-weight="400" fill="#333333">East</text><text x="67.72" y="42" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">18</text><text x="109.44" y="42" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">12</text><text x="151.16" y="42" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">9</text><text x="192.88" y="42" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">8</text><text x="237.6" y="42" font-size="6.5" font-weight="700" fill="#333333" text-anchor="end">47</text><line x1="0" y1="45" x2="252" y2="45" stroke="#E5E7EB" stroke-width="0.25"/><text x="0" y="53" font-size="6.5" font-weight="400" fill="#333333">West</text><text x="67.72" y="53" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">31</text><text x="109.44" y="53" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">17</text><text x="151.16" y="53" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">12</text><text x="192.88" y="53" font-size="6.5" font-weight="400" fill="#333333" text-anchor="end">11</text><text x="237.6" y="53" font-size="6.5" font-weight="700" fill="#333333" text-anchor="end">71</text><line x1="0" y1="56" x2="252" y2="56" stroke="#333333" stroke-width="0.5"/><text x="0" y="64" font-size="6.5" font-weight="700" fill="#333333">\u03A3</text><text x="67.72" y="64" font-size="6.5" font-weight="700" fill="#333333" text-anchor="end">113</text><text x="109.44" y="64" font-size="6.5" font-weight="700" fill="#333333" text-anchor="end">65</text><text x="151.16" y="64" font-size="6.5" font-weight="700" fill="#333333" text-anchor="end">47</text><text x="192.88" y="64" font-size="6.5" font-weight="700" fill="#333333" text-anchor="end">43</text><text x="237.6" y="64" font-size="6.5" font-weight="700" fill="#333333" text-anchor="end">268</text><line x1="0" y1="68" x2="252" y2="68" stroke="#333333" stroke-width="0.75"/></g></svg>`
     }
   ];
 
@@ -2515,6 +2643,7 @@
         shape.top = anchor.top;
         shape.width = width;
         shape.height = height;
+        protectShape(shape);
         shape.name = shapeName;
         shape.altTextDescription = `hatchmark v${REGISTRY_VERSION} ${chart} \u2014 live from ${state.source.address}`;
         shape.altTextTitle = encodeRecord(record);
