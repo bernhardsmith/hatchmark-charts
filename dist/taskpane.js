@@ -2815,6 +2815,22 @@
       }
       $("live-toggle-label").textContent = "Update charts automatically while the workbook is open";
     }
+    const AUTO_OPEN_KEY = "Office.AutoShowTaskpaneWithDocument";
+    const autoOpenStored = Office.context.document.settings.get(AUTO_OPEN_KEY);
+    const autoOpen = autoOpenStored === null || autoOpenStored === void 0 ? true : autoOpenStored === true;
+    $("auto-open").checked = autoOpen;
+    if (autoOpenStored === null || autoOpenStored === void 0) {
+      Office.context.document.settings.set(AUTO_OPEN_KEY, true);
+      Office.context.document.settings.saveAsync(() => {
+      });
+    }
+    $("auto-open").addEventListener("change", () => {
+      const on = $("auto-open").checked;
+      Office.context.document.settings.set(AUTO_OPEN_KEY, on);
+      Office.context.document.settings.saveAsync(() => {
+      });
+      setStatus(on ? "This pane will reopen automatically with this workbook (after you save it)." : "This pane will no longer open automatically with this workbook.");
+    });
     buildPicker();
     buildTemplates();
     showTheme(loadWorkbookTheme());
