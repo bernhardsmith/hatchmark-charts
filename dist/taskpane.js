@@ -1465,13 +1465,14 @@
     const series = [];
     const seen = /* @__PURE__ */ new Set();
     const normalized = [];
+    const badCodes = [];
     for (let r = 1; r < grid.length; r++) {
       const row = grid[r];
       const rawText = String(row[0] ?? "").trim();
       if (rawText === "" && row.slice(1).every((c) => c === "" || c === null || c === void 0)) continue;
       const parsed = parseScenarioCell(row[0]);
       if (parsed.scenario === null) {
-        errors.push(`${locate2.scenarioHeader(r)}: "${row[0]}" is not a scenario code \u2014 use one of ${SCENARIOS.join(", ")} (or e.g. "AC North" for small multiples).`);
+        badCodes.push({ where: locate2.scenarioHeader(r), text: rawText });
         continue;
       }
       if (parsed.normalizedFrom) normalized.push(`${parsed.normalizedFrom} \u2192 ${parsed.scenario}`);
@@ -1497,6 +1498,13 @@
       if (parsed.label) s.label = parsed.label;
       if (rawCode === "AC" && meta.good_direction) s.good_direction = meta.good_direction;
       series.push(s);
+    }
+    if (badCodes.length === 1) {
+      errors.push(`${badCodes[0].where}: "${badCodes[0].text}" is not a scenario code \u2014 use one of ${SCENARIOS.join(", ")} (or e.g. "AC North" for small multiples).`);
+    } else if (badCodes.length > 1) {
+      const shown = badCodes.slice(0, 4).map((b) => `"${b.text}"`).join(", ");
+      const more = badCodes.length > 4 ? ` and ${badCodes.length - 4} more` : "";
+      errors.push(`${badCodes.map((b) => b.where).slice(0, 4).join(", ")}${more}: ${shown} are not scenario codes \u2014 every line starts with ${SCENARIOS.join(", ")}, a friendly name (Actual, Plan, Forecast\u2026), or "AC North" for small multiples. Tip: select only your data block.`);
     }
     if (series.length === 0) errors.push(`No scenario lines found. ${LAYOUT_HELP}`);
     if (errors.length > 0) return { orientation, errors };
@@ -1912,7 +1920,8 @@
     try {
       const svg = renderChart(chart, state.dataset, options);
       $("preview").innerHTML = svg;
-      setStatus(`Preview: ${chart} \xB7 registry v${REGISTRY_VERSION}${state.sideways ? " \xB7 sideways layout detected" : ""}`);
+      const note = chart === "waterfall-column" ? " \xB7 dark by design: green/red is variance notation \u2014 for that, use the Bridge" : "";
+      setStatus(`Preview: ${chart} \xB7 registry v${REGISTRY_VERSION}${state.sideways ? " \xB7 sideways layout detected" : ""}${note}`);
       $("insert").disabled = false;
     } catch (err) {
       setStatus(err instanceof Error ? err.message : String(err), true);
