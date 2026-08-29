@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+  <title>Hatchmark Charts</title>
+  <script src="https://appsforoffice.microsoft.com/lib/1/hosted/office.js"></script>
+  <style>
+    :root { color-scheme: light; }
+    body { font-family: 'Segoe UI', -apple-system, sans-serif; font-size: 13px; color: #333; margin: 0; padding: 12px; background: #fff; }
+    h1 { font-size: 14px; margin: 0 0 2px; }
+    .sub { color: #666; font-size: 11px; margin-bottom: 12px; }
+    label { display: block; font-size: 11px; color: #555; margin: 8px 0 2px; }
+    select, input[type="text"] { width: 100%; box-sizing: border-box; padding: 4px 6px; font-size: 12px; border: 1px solid #ccc; border-radius: 3px; }
+    .row { display: flex; gap: 8px; }
+    .row > div { flex: 1; }
+    .check { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: 12px; }
+    button { margin-top: 10px; width: 100%; padding: 7px 0; font-size: 13px; border-radius: 4px; border: 1px solid #333; background: #333; color: #fff; cursor: pointer; }
+    button.secondary { background: #fff; color: #333; }
+    button:disabled { opacity: 0.4; cursor: default; }
+    #preview { margin-top: 12px; border: 1px solid #eee; border-radius: 4px; min-height: 120px; max-width: 360px; display: flex; align-items: center; justify-content: center; }
+    #preview svg { width: 100%; height: auto; }
+    .status { margin-top: 8px; font-size: 11px; color: #666; min-height: 28px; }
+    .status.error { color: #B00020; }
+    .hint { margin-top: 10px; font-size: 10.5px; color: #666; line-height: 1.45; border-top: 1px solid #eee; padding-top: 8px; }
+    .hint code { background: #f4f4f4; padding: 0 3px; border-radius: 2px; }
+    .hint b { color: #333; }
+    table.layout { border-collapse: collapse; margin: 6px 0; font-size: 10px; }
+    table.layout th, table.layout td { border: 1px solid #ddd; padding: 1px 6px; text-align: right; min-width: 16px; height: 14px; }
+    table.layout th { background: #f2f2f2; font-weight: 600; }
+    table.layout td.code { font-weight: 700; text-align: left; color: #333; }
+    .hint ul { margin: 6px 0; padding-left: 16px; }
+    .hint li { margin: 3px 0; }
+    button.linkish { background: none; border: none; color: #0066CC; text-decoration: underline; cursor: pointer; padding: 0; margin: 8px 0 0; width: auto; font-size: 11px; }
+    .live { margin-top: 10px; border-top: 1px solid #eee; padding-top: 8px; font-size: 11.5px; color: #555; }
+    .live-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+    button.small { width: auto; margin: 0; padding: 3px 10px; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <h1>Hatchmark Charts</h1>
+  <div class="sub">ISO 24896-aligned notation, rendered from the hatchmark registry</div>
+
+  <label for="chart-type">Chart type</label>
+  <select id="chart-type">
+    <option value="basic-column">Column — measure over time (AC/FC)</option>
+    <option value="absolute-variance-column">Absolute variance — Δ vs baseline</option>
+    <option value="relative-variance-pins">Relative variance — Δ% pins</option>
+  </select>
+
+  <div class="row">
+    <div>
+      <label for="baseline">Baseline (variance)</label>
+      <select id="baseline">
+        <option value="PL">PL — Plan</option>
+        <option value="BU">BU — Budget</option>
+        <option value="PY">PY — Previous year</option>
+      </select>
+    </div>
+    <div>
+      <label for="good-direction">Good direction</label>
+      <select id="good-direction">
+        <option value="up">Up (revenue-like)</option>
+        <option value="down">Down (cost-like)</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="row">
+    <div>
+      <label for="measure">Measure</label>
+      <input type="text" id="measure" placeholder="Net sales" value="Net sales" />
+    </div>
+    <div>
+      <label for="unit">Unit</label>
+      <input type="text" id="unit" placeholder="mEUR" value="mEUR" />
+    </div>
+  </div>
+
+  <label for="reporting-unit">Reporting unit (title line 1, optional)</label>
+  <input type="text" id="reporting-unit" placeholder="Alpha Corporation" />
+
+  <div class="row">
+    <div>
+      <label for="colour-mode">Colour mode</label>
+      <select id="colour-mode">
+        <option value="colour">Colour</option>
+        <option value="monochrome">Monochrome (print)</option>
+        <option value="cvd">Colour-vision safe</option>
+      </select>
+    </div>
+    <div class="check" style="align-items:flex-end">
+      <input type="checkbox" id="show-labels" checked />
+      <label for="show-labels" style="margin:0">Data labels</label>
+    </div>
+  </div>
+
+  <button id="load" class="secondary">Load selection</button>
+  <div id="preview"></div>
+  <button id="insert" disabled>Insert chart</button>
+  <div id="status" class="status"></div>
+
+  <div class="live">
+    <div class="live-row">
+      <span id="live-count">No live charts in this workbook yet.</span>
+      <button id="refresh-all" class="secondary small" disabled>Refresh all</button>
+    </div>
+    <div class="check">
+      <input type="checkbox" id="live-toggle" checked />
+      <label for="live-toggle" id="live-toggle-label" style="margin:0">Update charts automatically while this pane is open</label>
+    </div>
+  </div>
+
+  <div class="hint">
+    <b>How to lay out your data</b>
+    <svg viewBox="0 0 280 212" style="width:100%;max-width:340px;margin:6px 0" role="img"
+         aria-label="Schematic: a grid with a period-label header row and one row per scenario becomes a chart with solid actual columns and hatched forecast columns">
+      <defs>
+        <pattern id="hint-hatch" patternUnits="userSpaceOnUse" width="4" height="4" patternTransform="rotate(45)">
+          <line x1="0" y1="0" x2="0" y2="4" stroke="#333333" stroke-width="1.2"/>
+        </pattern>
+        <marker id="hint-arrow" markerWidth="6" markerHeight="6" refX="3" refY="5" orient="auto">
+          <path d="M1,1 L3,5 L5,1" fill="none" stroke="#0066CC" stroke-width="1"/>
+        </marker>
+      </defs>
+      <!-- annotation: period labels -->
+      <text x="103" y="12" font-size="9" fill="#0066CC" text-anchor="middle">period labels</text>
+      <line x1="103" y1="15" x2="103" y2="24" stroke="#0066CC" stroke-width="1" marker-end="url(#hint-arrow)"/>
+      <!-- the grid -->
+      <g font-size="9" fill="#333">
+        <rect x="12" y="26" width="182" height="16" fill="#f2f2f2" stroke="#ccc" stroke-width="0.6"/>
+        <rect x="12" y="42" width="182" height="48" fill="#fff" stroke="#ccc" stroke-width="0.6"/>
+        <line x1="42" y1="26" x2="42" y2="90" stroke="#ccc" stroke-width="0.6"/>
+        <line x1="80" y1="26" x2="80" y2="90" stroke="#ccc" stroke-width="0.6"/>
+        <line x1="118" y1="26" x2="118" y2="90" stroke="#ccc" stroke-width="0.6"/>
+        <line x1="156" y1="26" x2="156" y2="90" stroke="#ccc" stroke-width="0.6"/>
+        <line x1="12" y1="58" x2="194" y2="58" stroke="#ccc" stroke-width="0.6"/>
+        <line x1="12" y1="74" x2="194" y2="74" stroke="#ccc" stroke-width="0.6"/>
+        <text x="61" y="38" text-anchor="middle" font-weight="600">Jan</text>
+        <text x="99" y="38" text-anchor="middle" font-weight="600">Feb</text>
+        <text x="137" y="38" text-anchor="middle" font-weight="600">Mar</text>
+        <text x="175" y="38" text-anchor="middle" font-weight="600">Apr</text>
+        <text x="16" y="54" font-weight="700">AC</text>
+        <text x="61" y="54" text-anchor="middle">57</text>
+        <text x="99" y="54" text-anchor="middle">63</text>
+        <text x="16" y="70" font-weight="700">FC</text>
+        <text x="137" y="70" text-anchor="middle">66</text>
+        <text x="175" y="70" text-anchor="middle">72</text>
+        <text x="16" y="86" font-weight="700">PL</text>
+        <text x="61" y="86" text-anchor="middle">60</text>
+        <text x="99" y="86" text-anchor="middle">60</text>
+        <text x="137" y="86" text-anchor="middle">62</text>
+        <text x="175" y="86" text-anchor="middle">62</text>
+      </g>
+      <!-- annotation: scenario codes -->
+      <line x1="27" y1="101" x2="27" y2="92" stroke="#0066CC" stroke-width="1" marker-end="url(#hint-arrow)"/>
+      <text x="12" y="112" font-size="9" fill="#0066CC">scenario codes</text>
+      <!-- annotation: blank cells -->
+      <rect x="119" y="43" width="74" height="14" fill="none" stroke="#0066CC" stroke-width="0.8" stroke-dasharray="2,2"/>
+      <text x="200" y="49" font-size="9" fill="#0066CC">blank =</text>
+      <text x="200" y="59" font-size="9" fill="#0066CC">no value yet</text>
+      <!-- arrow to chart -->
+      <line x1="103" y1="122" x2="103" y2="136" stroke="#0066CC" stroke-width="1" marker-end="url(#hint-arrow)"/>
+      <text x="110" y="132" font-size="9" fill="#0066CC">Load selection</text>
+      <!-- the resulting mini chart -->
+      <g>
+        <rect x="54" y="168" width="14" height="31" fill="#333333"/>
+        <rect x="84" y="164" width="14" height="35" fill="#333333"/>
+        <rect x="114" y="163" width="14" height="36" fill="url(#hint-hatch)" stroke="#333333" stroke-width="0.6"/>
+        <rect x="144" y="159" width="14" height="40" fill="url(#hint-hatch)" stroke="#333333" stroke-width="0.6"/>
+        <line x1="44" y1="199" x2="170" y2="199" stroke="#333333" stroke-width="1"/>
+        <text x="61" y="209" font-size="7.5" fill="#555" text-anchor="middle">Jan</text>
+        <text x="91" y="209" font-size="7.5" fill="#555" text-anchor="middle">Feb</text>
+        <text x="121" y="209" font-size="7.5" fill="#555" text-anchor="middle">Mar</text>
+        <text x="151" y="209" font-size="7.5" fill="#555" text-anchor="middle">Apr</text>
+      </g>
+      <!-- fill legend -->
+      <g font-size="8.5" fill="#555">
+        <rect x="185" y="156" width="10" height="10" fill="#333333"/>
+        <text x="199" y="164">AC — solid</text>
+        <rect x="185" y="172" width="10" height="10" fill="url(#hint-hatch)" stroke="#333333" stroke-width="0.6"/>
+        <text x="199" y="180">FC — hatched</text>
+        <rect x="185" y="188" width="10" height="10" fill="#FFFFFF" stroke="#333333" stroke-width="1.2"/>
+        <text x="199" y="196">PL — outlined</text>
+      </g>
+    </svg>
+    <ul>
+      <li><b>Top row:</b> period labels (Jan, Q1, 2026 …). Leave the corner cell empty.</li>
+      <li><b>One row per scenario</b>, starting with its code: <code>AC</code>&nbsp;actual · <code>FC</code>&nbsp;forecast · <code>PL</code>&nbsp;plan · <code>BU</code>&nbsp;budget · <code>PY</code>&nbsp;last&nbsp;year.</li>
+      <li><b>Blank cell = no value.</b> In the example, actuals run to Feb and the forecast takes over from Mar — the chart shows solid columns, then hatched.</li>
+      <li><b>Sideways data works too:</b> scenario codes across the top row, periods down the first column. The pane detects the orientation automatically.</li>
+    </ul>
+    Select the <b>whole block, header row included</b>, then press
+    <b>Load selection</b>.
+    <br /><br />
+    Inserted charts are plain pictures, so they display for <i>anyone</i> —
+    add-in or not. While the add-in is running they refresh automatically
+    when their source cells change; on Microsoft&nbsp;365 it keeps running in
+    the background for as long as the workbook is open, even after you close
+    this pane. <b>Refresh all</b> catches up on edits made while the add-in
+    was not running.
+    <br />
+    <button id="example" class="linkish">New to this? Insert example data into my sheet</button>
+  </div>
+
+  <script src="dist/taskpane.js"></script>
+</body>
+</html>

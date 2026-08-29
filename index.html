@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Hatchmark Charts for Excel</title>
+<style>
+  body { font-family: -apple-system, 'Segoe UI', sans-serif; color: #333; background: #fff; margin: 0; }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 40px 24px 64px; line-height: 1.55; }
+  h1 { font-size: 28px; margin: 8px 0 4px; }
+  .tag { color: #666; margin: 0 0 28px; }
+  h2 { font-size: 18px; margin: 32px 0 8px; border-bottom: 1px solid #eee; padding-bottom: 6px; }
+  .card { border: 1px solid #e3e3e3; border-radius: 8px; padding: 16px 18px; margin: 14px 0; }
+  .card h3 { margin: 0 0 6px; font-size: 15px; }
+  .btn { display: inline-block; background: #333; color: #fff; text-decoration: none; padding: 8px 16px; border-radius: 5px; font-size: 14px; margin: 6px 8px 2px 0; }
+  .btn.alt { background: #fff; color: #333; border: 1px solid #333; }
+  ol { margin: 8px 0; padding-left: 22px; }
+  li { margin: 4px 0; }
+  code { background: #f4f4f4; padding: 1px 5px; border-radius: 3px; font-size: 13px; }
+  .note { font-size: 13px; color: #666; }
+  .swatches { display: flex; gap: 14px; margin: 10px 0; font-size: 13px; align-items: center; }
+  .sw { width: 14px; height: 14px; display: inline-block; vertical-align: -2px; margin-right: 5px; border: 1px solid #333; }
+  footer { margin-top: 44px; font-size: 12px; color: #888; border-top: 1px solid #eee; padding-top: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <img src="assets/icon-80.png" width="40" height="40" alt="" />
+  <h1>Hatchmark Charts for Excel</h1>
+  <p class="tag">Business charts with ISO 24896-aligned notation — actuals solid,
+  forecasts hatched, plan outlined, variances coloured by business impact —
+  rendered straight from your worksheet data, and kept up to date as it changes.</p>
+
+  <div class="swatches">
+    <span><span class="sw" style="background:#333"></span>AC — solid</span>
+    <span><span class="sw" style="background:repeating-linear-gradient(45deg,#fff,#fff 2px,#333 2px,#333 3px)"></span>FC — hatched</span>
+    <span><span class="sw" style="background:#fff"></span>PL/BU — outlined</span>
+    <span><span class="sw" style="background:#89B54A;border-color:#89B54A"></span>good</span>
+    <span><span class="sw" style="background:#E2001A;border-color:#E2001A"></span>bad</span>
+  </div>
+
+  <h2>Install</h2>
+
+  <div class="card">
+    <h3>Mac (Excel for Microsoft 365)</h3>
+    <a class="btn" href="install-mac.command" download>Download Mac installer</a>
+    <ol>
+      <li>Download, then <b>right-click the file ▸ Open</b> (first run only — macOS gate for downloaded scripts), and confirm.</li>
+      <li>Quit and reopen Excel.</li>
+      <li>Look for the <b>Hatchmark</b> tab in the ribbon.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h3>Windows (Excel for Microsoft 365)</h3>
+    <a class="btn" href="install-windows.ps1" download>Download Windows installer</a>
+    <ol>
+      <li>Right-click the downloaded file ▸ <b>Run with PowerShell</b> (if it reports a sharing error, run PowerShell as administrator and try again).</li>
+      <li>Restart Excel ▸ <b>Insert ▸ My Add-ins ▸ Shared Folder ▸ Hatchmark Charts</b>.</li>
+      <li>From then on it lives on the <b>Hatchmark</b> ribbon tab.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h3>Excel on the web (nothing to install)</h3>
+    <a class="btn alt" href="hatchmark-charts.xml" download>Download manifest file</a>
+    <ol>
+      <li>Open your workbook at <code>excel.cloud.microsoft</code>.</li>
+      <li><b>Insert ▸ Add-ins ▸ More Add-ins ▸ My Add-ins ▸ Upload My Add-in</b> and choose the downloaded manifest.</li>
+    </ol>
+  </div>
+
+  <h2>Use it</h2>
+  <ol>
+    <li>Lay out your data with period labels across the top and one row per
+        scenario, first cell the code: <code>AC</code> actual · <code>FC</code> forecast ·
+        <code>PL</code> plan · <code>BU</code> budget · <code>PY</code> last year.
+        Blank cell = no value. (Sideways — scenarios across the top — works too.)</li>
+    <li>Select the whole block, open the <b>Hatchmark</b> tab ▸ pane ▸ <b>Load selection</b>.</li>
+    <li>Pick a chart type, check the preview, <b>Insert chart</b>.</li>
+    <li>Edit your numbers — the chart updates itself while the add-in is running.
+        The pane's <b>Insert example data</b> button sets up a working example in one click.</li>
+  </ol>
+  <p class="note">Inserted charts are ordinary pictures: colleagues without the
+  add-in see and print them exactly as rendered.</p>
+
+  <h2>If something looks off</h2>
+  <p class="note">An "add-in error" banner usually clears with a full Excel
+  restart. Charts inserted by very old versions of the pane don't auto-update —
+  delete and re-insert them. Questions: ask your course instructor.</p>
+
+  <footer>
+    Not affiliated with, endorsed by, or certified by the IBCS Association or
+    ISO; references to the standards are descriptive. Rendering is generated
+    from the hatchmark notation registry.
+  </footer>
+</div>
+</body>
+</html>

@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OfficeApp
+  xmlns="http://schemas.microsoft.com/office/appforoffice/1.1"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:bt="http://schemas.microsoft.com/office/officeappbasictypes/1.0"
+  xmlns:ov="http://schemas.microsoft.com/office/taskpaneappversionoverrides"
+  xsi:type="TaskPaneApp">
+  <Id>82661C88-3206-465C-9F10-3B4A586D72BC</Id>
+  <Version>1.0.0.0</Version>
+  <ProviderName>Bernie Smith</ProviderName>
+  <DefaultLocale>en-US</DefaultLocale>
+  <DisplayName DefaultValue="Hatchmark Charts" />
+  <Description DefaultValue="Insert ISO 24896-aligned business charts (scenario notation, impact colouring, variance charts) rendered from the hatchmark notation registry." />
+  <IconUrl DefaultValue="https://bernhardsmith.github.io/hatchmark-charts/assets/icon-32.png" />
+  <HighResolutionIconUrl DefaultValue="https://bernhardsmith.github.io/hatchmark-charts/assets/icon-80.png" />
+  <SupportUrl DefaultValue="https://github.com/bernhardsmith/hatchmark-excel" />
+  <AppDomains>
+    <AppDomain>https://bernhardsmith.github.io/hatchmark-charts</AppDomain>
+  </AppDomains>
+  <Hosts>
+    <Host Name="Workbook" />
+  </Hosts>
+  <DefaultSettings>
+    <SourceLocation DefaultValue="https://bernhardsmith.github.io/hatchmark-charts/taskpane.html" />
+  </DefaultSettings>
+  <Permissions>ReadWriteDocument</Permissions>
+  <VersionOverrides xmlns="http://schemas.microsoft.com/office/taskpaneappversionoverrides" xsi:type="VersionOverridesV1_0">
+    <Hosts>
+      <Host xsi:type="Workbook">
+        <!-- Shared runtime: the add-in's page keeps running while the
+             workbook is open, so live chart updates continue after the task
+             pane is closed. Hosts without SharedRuntime support ignore this
+             and fall back to pane-open-only updates. -->
+        <Runtimes>
+          <Runtime resid="Taskpane.Url" lifetime="long" />
+        </Runtimes>
+        <DesktopFormFactor>
+          <GetStarted>
+            <Title resid="GetStarted.Title" />
+            <Description resid="GetStarted.Description" />
+            <LearnMoreUrl resid="Commands.Url" />
+          </GetStarted>
+          <ExtensionPoint xsi:type="PrimaryCommandSurface">
+            <!-- A dedicated ribbon tab so the add-in is unmissable. -->
+            <CustomTab id="Hatchmark.Tab">
+              <Group id="Hatchmark.Group1">
+                <Label resid="Group.Label" />
+                <Icon>
+                  <bt:Image size="16" resid="Icon.16" />
+                  <bt:Image size="32" resid="Icon.32" />
+                  <bt:Image size="80" resid="Icon.80" />
+                </Icon>
+                <Control xsi:type="Button" id="Hatchmark.TaskpaneButton">
+                  <Label resid="Button.Label" />
+                  <Supertip>
+                    <Title resid="Button.Title" />
+                    <Description resid="Button.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Icon.16" />
+                    <bt:Image size="32" resid="Icon.32" />
+                    <bt:Image size="80" resid="Icon.80" />
+                  </Icon>
+                  <Action xsi:type="ShowTaskpane">
+                    <TaskpaneId>ButtonId1</TaskpaneId>
+                    <SourceLocation resid="Taskpane.Url" />
+                  </Action>
+                </Control>
+              </Group>
+              <Label resid="Tab.Label" />
+            </CustomTab>
+          </ExtensionPoint>
+        </DesktopFormFactor>
+      </Host>
+    </Hosts>
+    <Resources>
+      <bt:Images>
+        <bt:Image id="Icon.16" DefaultValue="https://bernhardsmith.github.io/hatchmark-charts/assets/icon-16.png" />
+        <bt:Image id="Icon.32" DefaultValue="https://bernhardsmith.github.io/hatchmark-charts/assets/icon-32.png" />
+        <bt:Image id="Icon.80" DefaultValue="https://bernhardsmith.github.io/hatchmark-charts/assets/icon-80.png" />
+      </bt:Images>
+      <bt:Urls>
+        <bt:Url id="Commands.Url" DefaultValue="https://github.com/bernhardsmith/hatchmark-excel" />
+        <bt:Url id="Taskpane.Url" DefaultValue="https://bernhardsmith.github.io/hatchmark-charts/taskpane.html" />
+      </bt:Urls>
+      <bt:ShortStrings>
+        <bt:String id="Tab.Label" DefaultValue="Hatchmark" />
+        <bt:String id="GetStarted.Title" DefaultValue="Hatchmark Charts" />
+        <bt:String id="Group.Label" DefaultValue="Hatchmark" />
+        <bt:String id="Button.Label" DefaultValue="Hatchmark Charts" />
+        <bt:String id="Button.Title" DefaultValue="Insert a compliant chart" />
+      </bt:ShortStrings>
+      <bt:LongStrings>
+        <bt:String id="GetStarted.Description" DefaultValue="Select a data range and insert an ISO 24896-aligned chart." />
+        <bt:String id="Button.Tooltip" DefaultValue="Open the Hatchmark Charts pane: select a range with scenario rows (AC, PY, PL, BU, FC) and insert a chart with standard notation." />
+      </bt:LongStrings>
+    </Resources>
+  </VersionOverrides>
+</OfficeApp>
