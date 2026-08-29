@@ -670,7 +670,7 @@
       }
       marks.push(el("rect", { x, y: yTop, width: barW, height: h, ...attrs }));
       if (axisBreak && b.kind === "total") {
-        const yb = layout.plotH - 7;
+        const yb = Math.max(yTop + 3, layout.plotH - 7);
         marks.push(el("path", { d: `M ${x - 2} ${yb + 2} l ${barW + 4} -4`, stroke: COLOR.background, "stroke-width": 3.5, fill: "none" }));
         marks.push(el("path", { d: `M ${x - 2} ${yb} l ${barW + 4} -4`, stroke: STYLE.axisColor, "stroke-width": 0.6, fill: "none" }));
         marks.push(el("path", { d: `M ${x - 2} ${yb + 4} l ${barW + 4} -4`, stroke: STYLE.axisColor, "stroke-width": 0.6, fill: "none" }));
@@ -882,7 +882,8 @@
     const title = resolveTitle(dataset, options);
     const layout = hLayout(width, height, title);
     const rows = hBands(layout.plotH, dataset.periods.length);
-    const xFor = (v) => (v - axis.min) / (axis.max - axis.min) * layout.plotW;
+    const range = axis.max - axis.min;
+    const xFor = (v) => range <= 0 ? 0 : (v - axis.min) / range * layout.plotW;
     const prefix = options.id_prefix ?? `hm-${dataset.id}-basic-bar`;
     const usedHatch = /* @__PURE__ */ new Map();
     const marks = [];
@@ -1058,7 +1059,8 @@
         if (v === null) return;
         const band = bs[i];
         const barW = band.categoryW * RATIO_ABSOLUTE;
-        const h = Math.max(0, (v - axis.min) / (axis.max - axis.min) * innerH);
+        const range = axis.max - axis.min;
+        const h = range <= 0 ? 0 : Math.max(0, (v - axis.min) / range * innerH);
         g.push(el("rect", {
           x: band.x + (band.categoryW - barW) / 2,
           y: PANEL_TITLE_H + innerH - h,
@@ -1097,7 +1099,7 @@
     const mode = options.colour_mode ?? "colour";
     const compare = options.compare ?? ["AC", "FC"];
     const baseline = options.baseline ?? "PL";
-    const tiers = options.tiers ?? ["relative", "absolute"];
+    const tiers = (options.tiers ?? ["relative", "absolute"]).slice(0, 3);
     const decimals = options.axis?.decimals ?? 0;
     const good = goodDirection(dataset, compare);
     const base = seriesFor(dataset, baseline);
@@ -1122,8 +1124,10 @@
     const fmt2 = makeFormatter(values, axis, options.axis?.auto_scale !== false);
     const title = resolveTitle(dataset, options);
     const layout = computeLayout(width, height, title, true, axis.label, Math.max(0, ...tickValues(axis).map((t) => fmt2.plain(t).length)));
-    const tierH = Math.max(16, layout.plotH * TIER_RATIO);
-    const mainH = layout.plotH - tiers.length * (tierH + TIER_GAP);
+    const preferredTierH = Math.max(16, layout.plotH * TIER_RATIO);
+    const maxTierBlock = layout.plotH * 0.6;
+    const tierH = tiers.length > 0 ? Math.max(10, Math.min(preferredTierH, maxTierBlock / tiers.length - TIER_GAP)) : 0;
+    const mainH = Math.max(20, layout.plotH - tiers.length * (tierH + TIER_GAP));
     const bs = bands(layout.plotW, dataset.periods.length);
     const prefix = options.id_prefix ?? `hm-${dataset.id}-cwv`;
     const usedHatch = /* @__PURE__ */ new Map();
@@ -1249,7 +1253,7 @@
     const layout = computeLayout(width, height, title, false, "", 0);
     const wLabel = 30;
     const wNum = Math.max(26, layout.plotW * 0.14);
-    const wVar = (layout.plotW - wLabel - 2 * wNum) / 2;
+    const wVar = Math.max(30, (layout.plotW - wLabel - 2 * wNum) / 2);
     const xAc = wLabel + wNum;
     const xPl = xAc + wNum;
     const xDiff = xPl;
@@ -1302,7 +1306,7 @@
         parts.push(el("line", { x1: cx0, y1: cy, x2: r.pct >= 0 ? cx0 + w : cx0 - w, y2: cy, stroke: color, "stroke-width": 1.6 }));
         parts.push(el("rect", { x: (r.pct >= 0 ? cx0 + w : cx0 - w) - 1.5, y: cy - 1.5, width: 3, height: 3, fill: COLOR.measuredDark }));
         parts.push(el("line", { x1: cx0, y1: y + 1, x2: cx0, y2: y + ROW_H - 2, stroke: STYLE.axisColor, "stroke-width": 0.5 }));
-      } else if (!isTotal && r.ac !== null && r.pl !== null) {
+      } else if (r.ac !== null && r.pl !== null) {
         parts.push(td(xDiff + wVar + numW, "N/A"));
       }
     };
@@ -1373,13 +1377,23 @@
   function parseScenarioCell(raw) {
     const s = String(raw ?? "").trim();
     if (s === "") return { scenario: null };
-    const m = s.match(/^([A-Za-z ]+?)(?:\s*[:—-]\s*|\s+)(.+)$/);
-    const codePart = (m ? m[1] : s).trim().toUpperCase();
-    const label = m ? m[2].trim() : void 0;
-    if (SCENARIOS.includes(codePart)) return { scenario: codePart, label };
-    if (ALIASES[codePart]) return { scenario: ALIASES[codePart], label, normalizedFrom: codePart };
-    const whole = s.toUpperCase();
-    if (ALIASES[whole]) return { scenario: ALIASES[whole], normalizedFrom: whole };
+    const resolve = (code) => {
+      const up = code.trim().toUpperCase();
+      if (SCENARIOS.includes(up)) return { scenario: up };
+      if (ALIASES[up]) return { scenario: ALIASES[up], normalizedFrom: up };
+      return null;
+    };
+    const punct = s.match(/^(.+?)\s*[:—–-]\s*(.+)$/);
+    if (punct) {
+      const r = resolve(punct[1]);
+      if (r) return { ...r, label: punct[2].trim() };
+    }
+    const sp = s.match(/^([A-Za-z]{2})\s+(.+)$/);
+    if (sp && SCENARIOS.includes(sp[1].toUpperCase())) {
+      return { scenario: sp[1].toUpperCase(), label: sp[2].trim() };
+    }
+    const whole = resolve(s);
+    if (whole) return whole;
     return { scenario: null };
   }
   function detectGranularity(labels) {
@@ -1463,11 +1477,8 @@
       if (parsed.normalizedFrom) normalized.push(`${parsed.normalizedFrom} \u2192 ${parsed.scenario}`);
       const key = `${parsed.scenario}|${parsed.label ?? ""}`;
       if (seen.has(key)) {
-        errors.push(`${locate2.scenarioHeader(r)}: scenario ${parsed.scenario}${parsed.label ? ` "${parsed.label}"` : ""} appears more than once.`);
-        continue;
-      }
-      if (!parsed.label && seen.has(`${parsed.scenario}|`)) {
-        errors.push(`${locate2.scenarioHeader(r)}: scenario ${parsed.scenario} appears more than once \u2014 add labels ("${parsed.scenario} North") for small multiples.`);
+        const hint = parsed.label ? ` "${parsed.label}"` : ` \u2014 add labels ("${parsed.scenario} North") for small multiples`;
+        errors.push(`${locate2.scenarioHeader(r)}: scenario ${parsed.scenario}${hint} appears more than once.`);
         continue;
       }
       seen.add(key);
@@ -1569,6 +1580,10 @@
       if (parsed.scenario) scenarioLines.push({ scenario: parsed.scenario, label: parsed.label, index: i });
     }
     const lineFor = (sc) => scenarioLines.find((l) => l.scenario === sc && !l.label) ?? scenarioLines.find((l) => l.scenario === sc);
+    const ambiguous = (sc) => {
+      const matches = scenarioLines.filter((l) => l.scenario === sc);
+      return matches.length > 1 && !matches.some((l) => !l.label);
+    };
     const periods = (grid[0] ?? []).slice(1).map((p, j) => ({
       label: String(p ?? "").trim(),
       cell: (colOffset = 0) => orientation === "scenarios-in-rows" ? addr(0, j + 1 + colOffset) : addr(j + 1 + colOffset, 0)
@@ -1584,7 +1599,7 @@
       const v = grid[line.index][periodIdx + 1];
       return v !== null && v !== void 0 && String(v).trim() !== "";
     };
-    return { periods, cellFor, present };
+    return { periods, cellFor, present, ambiguous };
   }
   function transpose2(values) {
     const cols = Math.max(...values.map((r) => r.length));
@@ -1595,16 +1610,31 @@
     if (typeof located === "string") {
       return { formulas: [], header: [], rows: 0, numberFormats: [], cols: { label: 0, value: 1, base: 2, diff: 3, pct: 4 }, goodDirection: input.good_direction, errors: [located] };
     }
+    for (const sc of [...input.compare, input.baseline]) {
+      if (located.ambiguous(sc)) {
+        return {
+          formulas: [],
+          header: [],
+          rows: 0,
+          numberFormats: [],
+          cols: { label: 0, value: 1, base: 2, diff: 3, pct: 4 },
+          goodDirection: input.good_direction,
+          errors: [`${sc} exists only as labelled breakouts (${sc} North, ${sc} South, \u2026). Add a total ${sc} line, or select a single entity's block.`]
+        };
+      }
+    }
     const compareHeader = input.compare.join("&");
     const header = [input.measure || "Period", compareHeader, input.baseline, `\u0394${input.baseline}`, `\u0394${input.baseline}%`];
     const cValue = colLetter(anchorCol + 1);
     const cBase = colLetter(anchorCol + 2);
     const cDiff = colLetter(anchorCol + 3);
     const body = [];
+    let anyBase = false;
     located.periods.forEach((p, i) => {
       const srcCompare = input.compare.find((sc) => located.present(sc, i)) ?? null;
       const valueRef = srcCompare ? located.cellFor(srcCompare, i) : null;
-      const baseRef = located.cellFor(input.baseline, i);
+      const baseRef = located.present(input.baseline, i) ? located.cellFor(input.baseline, i) : null;
+      if (baseRef) anyBase = true;
       const rowNum = anchorRow + 1 + i;
       body.push([
         p.label,
@@ -1620,9 +1650,9 @@
     const total = [
       "\u03A3",
       `=SUM(${cValue}${firstData}:${cValue}${lastData})`,
-      `=SUM(${cBase}${firstData}:${cBase}${lastData})`,
-      `=${cValue}${totalRowNum}-${cBase}${totalRowNum}`,
-      `=IF(${cBase}${totalRowNum}<=0,"N/A",${cDiff}${totalRowNum}/${cBase}${totalRowNum})`
+      anyBase ? `=SUM(${cBase}${firstData}:${cBase}${lastData})` : null,
+      anyBase ? `=IF(${cBase}${totalRowNum}<=0,"N/A",${cValue}${totalRowNum}-${cBase}${totalRowNum})` : null,
+      anyBase ? `=IF(${cBase}${totalRowNum}<=0,"N/A",${cDiff}${totalRowNum}/${cBase}${totalRowNum})` : null
     ];
     return {
       formulas: [header, ...body, total],
@@ -1636,7 +1666,7 @@
   }
 
   // src/liveCharts.ts
-  var REGISTRY_VERSION = "0.2.1";
+  var REGISTRY_VERSION = "0.2.2";
   var SETTINGS_KEY = "hatchmark-live-charts";
   function newRecordId() {
     try {
