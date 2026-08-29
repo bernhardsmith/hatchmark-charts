@@ -35,6 +35,25 @@
     .live { margin-top: 10px; border-top: 1px solid #eee; padding-top: 8px; font-size: 11.5px; color: #555; }
     .live-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
     button.small { width: auto; margin: 0; padding: 3px 10px; font-size: 11px; }
+    details { margin-top: 10px; border: 1px solid #eee; border-radius: 4px; padding: 6px 8px; }
+    details > summary { font-size: 12px; font-weight: 600; color: #333; cursor: pointer; }
+    #chart-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 6px; }
+    .grid-group { grid-column: 1 / -1; font-size: 10px; color: #888; text-transform: uppercase; letter-spacing: 0.04em; margin-top: 4px; }
+    button.thumb { margin: 0; padding: 3px; background: #fff; border: 1px solid #ddd; border-radius: 4px; display: flex; flex-direction: column; gap: 2px; align-items: stretch; }
+    button.thumb.selected { border-color: #333; box-shadow: 0 0 0 1px #333; }
+    .thumb-svg { display: block; overflow: hidden; border-radius: 2px; }
+    .thumb-svg svg { width: 100%; height: auto; display: block; }
+    .thumb-label { font-size: 9.5px; color: #444; text-align: center; line-height: 1.2; }
+    textarea { width: 100%; box-sizing: border-box; padding: 4px 6px; font-size: 12px; border: 1px solid #ccc; border-radius: 3px; font-family: inherit; min-height: 44px; }
+    input[type="color"] { width: 100%; height: 28px; padding: 1px; border: 1px solid #ccc; border-radius: 3px; background: #fff; }
+    .edit-banner { margin-top: 8px; padding: 6px 8px; background: #FFF7DF; border: 1px solid #E4CF8B; border-radius: 4px; font-size: 11.5px; }
+    .chart-row { display: flex; align-items: center; gap: 6px; padding: 4px 0; border-bottom: 1px solid #f2f2f2; font-size: 11.5px; }
+    .chart-row span { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .chart-row.editing { background: #FFF7DF; }
+    .template-row { margin: 8px 0; }
+    .template-desc { font-size: 10.5px; color: #666; margin-top: 3px; line-height: 1.35; }
+    .theme-buttons { display: flex; gap: 6px; }
+    .theme-buttons button { flex: 1; }
   </style>
 </head>
 <body>
@@ -42,29 +61,11 @@
   <div class="sub">ISO 24896-aligned notation, rendered from the hatchmark registry</div>
 
   <label for="chart-type">Chart type</label>
-  <select id="chart-type">
-    <optgroup label="Time — level">
-      <option value="basic-column">Column — measure over time (AC/FC)</option>
-      <option value="basic-line">Line — many periods</option>
-      <option value="basic-area">Area — solid actuals, hatched forecast</option>
-      <option value="waterfall-column">Waterfall — cumulative build (dark: measure, not variance)</option>
-    </optgroup>
-    <optgroup label="Time — vs baseline">
-      <option value="absolute-variance-column">Absolute variance — Δ columns</option>
-      <option value="relative-variance-pins">Relative variance — Δ% pins</option>
-      <option value="column-with-variance">Report chart — Δ% + Δ tiers over columns</option>
-      <option value="contribution-waterfall">Bridge — baseline to actual (green/red steps)</option>
-    </optgroup>
-    <optgroup label="Structure — categories">
-      <option value="basic-bar">Bars — measure by category</option>
-      <option value="absolute-variance-bar">Δ bars by category</option>
-      <option value="relative-variance-pins-bar">Δ% pins by category</option>
-    </optgroup>
-    <optgroup label="Grids &amp; tables (pictures)">
-      <option value="small-multiples-column">Small multiples — one panel per entity</option>
-      <option value="variance-table">Variance table — AC · PL · ΔPL · ΔPL%</option>
-    </optgroup>
-  </select>
+  <select id="chart-type"></select>
+  <details open>
+    <summary>Visual chooser</summary>
+    <div id="chart-grid"></div>
+  </details>
 
   <div class="row">
     <div>
@@ -113,8 +114,16 @@
     </div>
   </div>
 
+  <details>
+    <summary>Comment markers</summary>
+    <label for="comments-input">One per line — <code>Period: text</code> (e.g. <code>Mar: Rollout pulled forward</code>)</label>
+    <textarea id="comments-input" placeholder="Mar: Kaffeehaus Nord rollout pulled forward&#10;May: Boiler component supply delay"></textarea>
+    <div class="template-desc">Numbered markers appear on those periods; the texts become footnotes under the chart. Not available on the Bridge (its steps aren’t periods).</div>
+  </details>
+
   <button id="load" class="secondary">Load selection</button>
   <div id="preview"></div>
+  <div id="edit-banner" class="edit-banner" style="display:none">Editing <b id="edit-what"></b> — changes apply to the existing picture. <button id="edit-cancel" class="linkish">Cancel</button></div>
   <button id="insert" disabled>Insert chart</button>
   <button id="insert-native-table" class="secondary" disabled>Insert native Excel table — live formulas, no add-in needed to view</button>
   <div id="status" class="status"></div>
@@ -129,6 +138,47 @@
       <label for="live-toggle" id="live-toggle-label" style="margin:0">Update charts automatically while this pane is open</label>
     </div>
   </div>
+
+  <div id="charts-section" style="display:none">
+    <details open>
+      <summary>Charts in this workbook</summary>
+      <div id="chart-list"></div>
+      <div class="template-desc">Edit re-opens a chart’s settings; applying updates the existing picture in place — it is never re-created.</div>
+    </details>
+  </div>
+
+  <details>
+    <summary>House-style theme</summary>
+    <div class="row">
+      <div>
+        <label for="theme-good">Desirable</label>
+        <input type="color" id="theme-good" value="#89B54A" />
+      </div>
+      <div>
+        <label for="theme-bad">Undesirable</label>
+        <input type="color" id="theme-bad" value="#E2001A" />
+      </div>
+    </div>
+    <label for="theme-font">Font family (optional)</label>
+    <input type="text" id="theme-font" placeholder="'Barlow', sans-serif" />
+    <div class="theme-buttons">
+      <button id="theme-apply" class="small">Apply to workbook</button>
+      <button id="theme-reset" class="secondary small">Reset</button>
+    </div>
+    <label for="theme-json">Export / import (JSON)</label>
+    <textarea id="theme-json" placeholder='{ "desirable": "#117755", "undesirable": "#AA1177" }'></textarea>
+    <div class="theme-buttons">
+      <button id="theme-export" class="secondary small">Export</button>
+      <button id="theme-import" class="secondary small">Import</button>
+    </div>
+    <div class="template-desc">Themes restyle house-style tokens only (impact colours in Colour mode, typeface). Scenario notation and the print/CVD schemes are fixed by the standard.</div>
+  </details>
+
+  <details>
+    <summary>Starter templates — Fioretti Espresso Systems</summary>
+    <div id="template-list"></div>
+    <div class="template-desc">Each writes a fresh sheet with realistic course data, the story behind the numbers, and live charts already bound to the cells.</div>
+  </details>
 
   <div class="hint">
     <b>How to lay out your data</b>
