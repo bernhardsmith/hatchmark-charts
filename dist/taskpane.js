@@ -124,6 +124,14 @@
   var RATIO_ABSOLUTE = 2 / 3;
   var RATIO_RELATIVE = 1 / 3;
   var CHAR_WIDTH_FACTOR = 0.52;
+  var CAP_HEIGHT_FACTOR = 0.72;
+  var PIN_LABEL_GAP = 2;
+  function pinLabelBaseline(tipY, headSize, positive, fs) {
+    return positive ? tipY - headSize / 2 - PIN_LABEL_GAP : tipY + headSize / 2 + PIN_LABEL_GAP + fs * CAP_HEIGHT_FACTOR;
+  }
+  function pinLabelRoom(headMax, labelled, fs) {
+    return headMax / 2 + (labelled ? PIN_LABEL_GAP + fs * CAP_HEIGHT_FACTOR + 1 : 1);
+  }
   var TITLE_LINE_H = Math.ceil(FS.title * 1.25);
   function wrapWords(words, maxChars) {
     const lines = [];
@@ -507,7 +515,11 @@
     const usedHatch = /* @__PURE__ */ new Map();
     const interpretablePcts = pins.filter((p) => p.interpretable).map((p) => Math.abs(p.pct));
     const maxAbs = Math.max(1e-6, ...interpretablePcts);
-    const varScale = layout.plotH * PIN_MAX_EXTENT / maxAbs;
+    const roomLabelled = pinLabelRoom(PIN_HEAD_MAX, options.show_data_labels === true, FS.dataLabel);
+    const showLabels = options.show_data_labels === true && layout.plotH / 2 - roomLabelled >= layout.plotH * 0.15;
+    const room = pinLabelRoom(PIN_HEAD_MAX, showLabels, FS.dataLabel);
+    const maxExtent = Math.max(layout.plotH * 0.15, Math.min(layout.plotH * PIN_MAX_EXTENT, layout.plotH / 2 - room));
+    const varScale = maxExtent / maxAbs;
     const mid = layout.plotH * 0.5;
     const bs = bands(layout.plotW, dataset.periods.length);
     const marks = [];
@@ -544,9 +556,9 @@
         stroke: fp.stroke ?? COLOR.measuredDark,
         "stroke-width": fp["stroke-width"] ?? 0.5
       }));
-      if (options.show_data_labels) {
+      if (showLabels) {
         const label = p.interpretable ? formatSigned(p.pct, decimals, "", "%") : "N/A";
-        const labelY = p.pct >= 0 || !p.interpretable ? tipY - headSize / 2 - 1 : tipY + headSize / 2 + FS.dataLabel;
+        const labelY = pinLabelBaseline(tipY, headSize, p.pct >= 0 || !p.interpretable, FS.dataLabel);
         labels.push(text(
           { x: cx, y: labelY, "font-size": FS.dataLabel, fill: COLOR.measuredDark, "text-anchor": "middle" },
           label
@@ -984,8 +996,8 @@
           ...isFc ? { fill: `url(#${hatchFor(color)})`, stroke: color, "stroke-width": 0.5 } : { fill: color }
         }));
       }
+      const headSize = relative ? Math.max(3, Math.min(barH * 0.45, 5)) : 0;
       if (relative) {
-        const headSize = Math.max(3, Math.min(barH * 0.45, 5));
         const tipX = interpretable ? v >= 0 ? midX + w : midX - w : midX;
         const treatment = scenarioFill(d.scenario);
         const scolor = scenarioColor(d.scenario);
@@ -1003,7 +1015,8 @@
       if (options.show_data_labels) {
         const label = !interpretable ? "N/A" : relative ? formatSigned(v, decimals, "", "%") : fmt2.signed(v);
         const anchorRight = v >= 0 || !interpretable;
-        const lx = anchorRight ? midX + w + 4 : midX - w - 4;
+        const clear = Math.max(4, headSize / 2 + PIN_LABEL_GAP);
+        const lx = anchorRight ? midX + w + clear : midX - w - clear;
         texts.push(text(
           { x: lx, y: row.y + row.categoryH / 2 + FS.dataLabel / 3, "font-size": FS.dataLabel, fill: COLOR.measuredDark, "text-anchor": anchorRight ? "start" : "end" },
           label
@@ -1093,6 +1106,8 @@
   // node_modules/hatchmark/src/render/columnWithVariance.ts
   var TIER_RATIO = 0.22;
   var TIER_GAP = 5;
+  var TIER_FS = 5.5;
+  var TIER_HEAD_MAX = 5;
   function renderColumnWithVariance(dataset, options = {}) {
     const width = options.width ?? 260;
     const height = options.height ?? 190;
@@ -1142,9 +1157,12 @@
       const rel = tier === "relative";
       const tierValues = diffs.map((d) => d === null ? null : rel ? d.pct : d.diff);
       const maxAbs = Math.max(1e-6, ...tierValues.filter((v) => v !== null).map(Math.abs));
-      const scale = tierH * 0.4 / maxAbs;
+      const roomLabelled = pinLabelRoom(rel ? TIER_HEAD_MAX : 0, options.show_data_labels === true, TIER_FS);
+      const showLabels = options.show_data_labels === true && tierH / 2 - roomLabelled >= tierH * 0.15;
+      const room = pinLabelRoom(rel ? TIER_HEAD_MAX : 0, showLabels, TIER_FS);
+      const scale = Math.max(tierH * 0.15, Math.min(tierH * 0.4, tierH / 2 - room)) / maxAbs;
       const mid = tierH / 2;
-      g.push(text({ x: 0, y: 5.5, "font-size": 5.5, fill: STYLE.axisColor }, `\u0394${baseline}${rel ? "%" : ""}`));
+      g.push(text({ x: -3, y: 5.5, "font-size": TIER_FS, fill: STYLE.axisColor, "text-anchor": "end" }, `\u0394${baseline}${rel ? "%" : ""}`));
       diffs.forEach((d, i) => {
         if (d === null) return;
         const v = rel ? d.pct : d.diff;
@@ -1152,6 +1170,7 @@
         const ratio = rel ? RATIO_RELATIVE : RATIO_ABSOLUTE;
         const barW = band.categoryW * ratio;
         const shaftW = rel ? Math.max(1, Math.min(barW * 0.16, 2)) : barW;
+        const headSize = rel ? Math.max(3, Math.min(barW * 0.45, TIER_HEAD_MAX)) : 0;
         const x = band.x + (band.categoryW - shaftW) / 2;
         const interpretable = v !== null;
         const val = v ?? 0;
@@ -1169,7 +1188,6 @@
           }));
         }
         if (rel) {
-          const headSize = Math.max(3, Math.min(barW * 0.45, 5));
           const tipY = interpretable ? val >= 0 ? mid - h : mid + h : mid;
           const treatment = scenarioFill(d.scenario);
           const scolor = scenarioColor(d.scenario);
@@ -1184,11 +1202,11 @@
             "stroke-width": fp["stroke-width"] ?? 0.5
           }));
         }
-        if (options.show_data_labels) {
+        if (showLabels) {
           const label = !interpretable ? "N/A" : rel ? formatSigned(val, decimals, "", "%") : fmt2.signed(val);
           const tipY = val >= 0 ? mid - h : mid + h;
           g.push(text(
-            { x: band.x + band.categoryW / 2, y: val >= 0 ? tipY - 1.5 : tipY + FS.dataLabel, "font-size": 5.5, fill: COLOR.measuredDark, "text-anchor": "middle" },
+            { x: band.x + band.categoryW / 2, y: pinLabelBaseline(tipY, headSize, val >= 0, TIER_FS), "font-size": TIER_FS, fill: COLOR.measuredDark, "text-anchor": "middle" },
             label
           ));
         }
@@ -1674,7 +1692,7 @@
   }
 
   // src/liveCharts.ts
-  var REGISTRY_VERSION = "0.2.2";
+  var REGISTRY_VERSION = "0.2.3";
   var SETTINGS_KEY = "hatchmark-live-charts";
   function newRecordId() {
     try {
@@ -1750,6 +1768,46 @@
   function altText(record) {
     return `hatchmark v${REGISTRY_VERSION} ${record.chart} \u2014 live from ${record.sourceAddress}`;
   }
+  function encodeRecord(record) {
+    return JSON.stringify(record);
+  }
+  function decodeRecord(raw) {
+    if (typeof raw !== "string" || !raw.startsWith("{")) return null;
+    try {
+      const r = JSON.parse(raw);
+      if (typeof r.id === "string" && typeof r.shapeName === "string" && typeof r.worksheetId === "string" && typeof r.sourceAddress === "string" && typeof r.chart === "string" && r.meta !== null && typeof r.meta === "object" && r.options !== null && typeof r.options === "object") {
+        return r;
+      }
+    } catch {
+    }
+    return null;
+  }
+  async function reconcileRecords() {
+    const known = new Set(loadRecords().map((r) => r.id));
+    const recovered = [];
+    await Excel.run(async (ctx) => {
+      const sheets = ctx.workbook.worksheets;
+      sheets.load("items/id");
+      await ctx.sync();
+      for (const ws of sheets.items) {
+        ws.shapes.load("items/name,items/altTextTitle");
+        await ctx.sync();
+        for (const s of ws.shapes.items) {
+          if (!s.name.startsWith("hatchmark:")) continue;
+          const id = s.name.slice("hatchmark:".length);
+          if (known.has(id)) continue;
+          const rec = decodeRecord(s.altTextTitle);
+          if (rec && rec.id === id) {
+            rec.hostSheetId = ws.id;
+            recovered.push(rec);
+            known.add(id);
+          }
+        }
+      }
+    });
+    for (const rec of recovered) await upsertRecord(rec);
+    return recovered;
+  }
   async function refreshRecord(record, force = false) {
     let values = [];
     let missingSource = false;
@@ -1802,6 +1860,12 @@
         return;
       }
       const target = hostSheet;
+      if (record.hostSheetId !== target.id || record.registry_version !== REGISTRY_VERSION) {
+        record.hostSheetId = target.id;
+        record.registry_version = REGISTRY_VERSION;
+        record.updated = (/* @__PURE__ */ new Date()).toISOString();
+        structuralChange = true;
+      }
       const shape = target.shapes.addImage(png);
       shape.left = geometry.left;
       shape.top = geometry.top;
@@ -1809,16 +1873,11 @@
       shape.height = geometry.height;
       shape.name = record.shapeName;
       shape.altTextDescription = altText(record);
+      shape.altTextTitle = encodeRecord(record);
       if (!selection.address.includes(",")) {
         ctx.workbook.worksheets.getActiveWorksheet().getRange(stripSheet(selection.address)).select();
       }
       await ctx.sync();
-      if (record.hostSheetId !== target.id || record.registry_version !== REGISTRY_VERSION) {
-        record.hostSheetId = target.id;
-        record.registry_version = REGISTRY_VERSION;
-        record.updated = (/* @__PURE__ */ new Date()).toISOString();
-        structuralChange = true;
-      }
     });
     if (orphaned) {
       await removeRecord(record.id);
@@ -2043,33 +2102,27 @@
     const id = newRecordId();
     const shapeName = `hatchmark:${id}`;
     try {
-      const svg = renderChart(chart, state.dataset, options);
+      let dataset = state.dataset;
+      await Excel.run(async (ctx) => {
+        const sheet = ctx.workbook.worksheets.getItemOrNullObject(state.source.worksheetId);
+        await ctx.sync();
+        if (sheet.isNullObject) return;
+        const range = sheet.getRange(state.source.address.split("!").pop());
+        range.load("values");
+        await ctx.sync();
+        const fresh = rangeToDataset(range.values, meta);
+        if (fresh.dataset) dataset = fresh.dataset;
+      });
+      const svg = renderChart(chart, dataset, options);
       const size = svg.match(/width="(\d+(?:\.\d+)?)" height="(\d+(?:\.\d+)?)"/);
       const width = size ? Number(size[1]) : options.width ?? 320;
       const height = size ? Number(size[2]) : options.height ?? 200;
       const png = await svgToPngBase64(svg, width, height);
-      let hostSheetId = "";
-      await Excel.run(async (ctx) => {
-        const sheet = ctx.workbook.worksheets.getActiveWorksheet();
-        const sel = ctx.workbook.getSelectedRange();
-        sel.load(["left", "top", "width"]);
-        sheet.load("id");
-        await ctx.sync();
-        const shape = sheet.shapes.addImage(png);
-        shape.left = sel.left + sel.width + 12;
-        shape.top = sel.top;
-        shape.width = width;
-        shape.height = height;
-        shape.name = shapeName;
-        shape.altTextDescription = `hatchmark v${REGISTRY_VERSION} ${chart} \u2014 live from ${state.source.address}`;
-        await ctx.sync();
-        hostSheetId = sheet.id;
-      });
       const record = {
         id,
         shapeName,
         worksheetId: state.source.worksheetId,
-        hostSheetId,
+        hostSheetId: "",
         sourceAddress: state.source.address,
         chart,
         meta,
@@ -2083,6 +2136,23 @@
         registry_version: REGISTRY_VERSION,
         updated: (/* @__PURE__ */ new Date()).toISOString()
       };
+      await Excel.run(async (ctx) => {
+        const sheet = ctx.workbook.worksheets.getActiveWorksheet();
+        const sel = ctx.workbook.getSelectedRange();
+        sel.load(["left", "top", "width"]);
+        sheet.load("id");
+        await ctx.sync();
+        record.hostSheetId = sheet.id;
+        const shape = sheet.shapes.addImage(png);
+        shape.left = sel.left + sel.width + 12;
+        shape.top = sel.top;
+        shape.width = width;
+        shape.height = height;
+        shape.name = shapeName;
+        shape.altTextDescription = `hatchmark v${REGISTRY_VERSION} ${chart} \u2014 live from ${state.source.address}`;
+        shape.altTextTitle = encodeRecord(record);
+        await ctx.sync();
+      });
       await upsertRecord(record);
       updateLiveCount();
       setStatus(`Inserted ${chart} \u2014 updates automatically from ${state.source.address} ${liveScopeText()}.`);
@@ -2144,5 +2214,12 @@
       updateLiveCount();
     }).catch((err) => setStatus(String(err), true));
     setStatus('Select your data range, then press "Load selection".');
+    reconcileRecords().then(async (recovered) => {
+      if (recovered.length === 0) return;
+      for (const rec of recovered) await refreshRecord(rec, true);
+      updateLiveCount();
+      setStatus(`Reconnected ${recovered.length} chart(s) found in this workbook \u2014 live updates restored.`);
+    }).catch(() => {
+    });
   });
 })();
