@@ -2826,6 +2826,33 @@
     });
   }
 
+  // src/sizing.ts
+  var DEFAULT_CHART_WIDTH = 320;
+  var CHART_HEIGHTS = {
+    "column-with-variance": 260,
+    "small-multiples-column": 230
+  };
+  var TABLE_CHARTS = /* @__PURE__ */ new Set([
+    "variance-table",
+    "time-series-table",
+    "cross-table"
+  ]);
+  function measureSvg(svg) {
+    const m = svg.match(/width="(\d+(?:\.\d+)?)" height="(\d+(?:\.\d+)?)"/);
+    return m ? { width: Number(m[1]), height: Number(m[2]) } : null;
+  }
+  function naturalSize(chart, renderIntrinsic) {
+    if (!TABLE_CHARTS.has(chart)) {
+      return { width: DEFAULT_CHART_WIDTH, height: CHART_HEIGHTS[chart] ?? 200 };
+    }
+    const measured = measureSvg(renderIntrinsic());
+    if (!measured) throw new Error("Could not measure the table render.");
+    return measured;
+  }
+  function intrinsicOptions(options) {
+    return { ...options, width: void 0, height: void 0 };
+  }
+
   // src/taskpane.ts
   var state = { dataset: null, sideways: false, source: null, editing: null };
   var CHART_LABEL = new Map(CHART_CHOICES.map((c) => [c.id, c.label.split(" \u2014 ")[0]]));
@@ -2836,9 +2863,6 @@
   function $(id) {
     return document.getElementById(id);
   }
-  var CHART_HEIGHTS = { "column-with-variance": 260, "small-multiples-column": 230 };
-  var TABLE_CHARTS = /* @__PURE__ */ new Set(["variance-table", "time-series-table", "cross-table"]);
-  var DEFAULT_CHART_WIDTH = 320;
   function readOptions() {
     const chart = $("chart-type").value;
     const baseline = $("baseline").value;
@@ -3203,12 +3227,13 @@
   }
   async function resetSize(recordId) {
     const record = loadRecords().find((r) => r.id === recordId);
-    if (!record) return;
+    if (!record) {
+      setStatus("That chart is no longer tracked in this workbook.", true);
+      return;
+    }
     try {
-      let w;
-      let h;
+      let values = null;
       if (TABLE_CHARTS.has(record.chart)) {
-        let values = null;
         await Excel.run(async (ctx) => {
           const sheet = ctx.workbook.worksheets.getItemOrNullObject(record.worksheetId);
           await ctx.sync();
@@ -3219,31 +3244,28 @@
           await ctx.sync();
           values = range.values;
         });
-        if (!values) throw new Error("The source worksheet no longer exists.");
+      }
+      const size = naturalSize(record.chart, () => {
+        if (!values) throw new Error("Could not read the source range \u2014 has the worksheet been deleted?");
         const mapped = rangeToDataset(values, record.meta);
         if (!mapped.dataset) throw new Error(mapped.errors[0] ?? "The source no longer parses.");
-        const svg = renderChart(record.chart, mapped.dataset, {
+        return renderChart(record.chart, mapped.dataset, intrinsicOptions({
           ...record.options,
-          width: void 0,
-          height: void 0,
           axis: { auto_scale: record.options.auto_scale !== false },
           theme: loadWorkbookTheme() ?? void 0,
           compare: ["AC", "FC"]
-        });
-        const size = svg.match(/width="(\d+(?:\.\d+)?)" height="(\d+(?:\.\d+)?)"/);
-        if (!size) throw new Error("Could not measure the table render.");
-        w = Number(size[1]);
-        h = Number(size[2]);
-      } else {
-        w = DEFAULT_CHART_WIDTH;
-        h = CHART_HEIGHTS[record.chart] ?? 200;
-      }
-      record.options.width = w;
-      record.options.height = h;
+        }));
+      });
+      record.options.width = size.width;
+      record.options.height = size.height;
       record.updated = (/* @__PURE__ */ new Date()).toISOString();
       await upsertRecord(record);
-      const res = await refreshRecord(record, true, { width: w, height: h });
-      setStatus(res.ok ? `Restored natural size (${Math.round(w)}\xD7${Math.round(h)}): ${chartListLabel(record)}` : res.message, !res.ok);
+      const res = await refreshRecord(record, true, size);
+      const retired = res.message.includes("no longer tracked");
+      setStatus(
+        !res.ok ? res.message : retired ? res.message : `Restored natural size (${Math.round(size.width)}\xD7${Math.round(size.height)}): ${chartListLabel(record)}`,
+        !res.ok
+      );
       updateLiveCount();
     } catch (err) {
       setStatus(err instanceof Error ? err.message : String(err), true);
