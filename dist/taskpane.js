@@ -2034,7 +2034,7 @@
   }
 
   // src/liveCharts.ts
-  var REGISTRY_VERSION = "0.5.1";
+  var REGISTRY_VERSION = "0.5.2";
   var SETTINGS_KEY = "hatchmark-live-charts";
   var THEME_KEY = "hatchmark-theme";
   function newRecordId() {

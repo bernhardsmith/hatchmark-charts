@@ -1,0 +1,1479 @@
+{
+  "schema": 1,
+  "registry_version": "0.5.2",
+  "generated_from": "https://github.com/bernhardsmith/hatchmark",
+  "disclaimer": "Not affiliated with, endorsed by, or certified by the IBCS Association or ISO; references to the standards are descriptive. Clause citations point to the published standards, whose text is not reproduced here.",
+  "charts": [
+    {
+      "id": "absolute-variance-bar",
+      "kind": "chart",
+      "name": "Absolute variance bars (structure)",
+      "family": "structure-bars",
+      "status": "draft",
+      "purpose": "Δ(compare − baseline) per category as horizontal bars from a vertical zero line carrying the baseline scenario's design, coloured by business impact.",
+      "notation": {
+        "variance_colouring": {
+          "by": "business impact (good_direction)",
+          "desirable": "impact-desirable",
+          "undesirable": "impact-undesirable"
+        },
+        "data_labels": {
+          "format": "signed",
+          "placement": "beyond bar end"
+        },
+        "title_block": "required (ΔPL)"
+      },
+      "geometry": null,
+      "data_contract": {
+        "dimension": {
+          "type": "structure"
+        },
+        "series": {
+          "min": 2,
+          "scenarios_allowed": [
+            "AC",
+            "PY",
+            "PL",
+            "BU",
+            "FC"
+          ]
+        },
+        "derived": {
+          "value": "compare - baseline",
+          "compare": "first non-null among [AC, FC]",
+          "baseline": "PL default"
+        }
+      },
+      "anti_patterns": null,
+      "applies_rules": [
+        "variance-needs-baseline"
+      ],
+      "basis": "standard",
+      "citations": [
+        "IBCS 2.0 UN 4.1"
+      ],
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"260\" height=\"160\" viewBox=\"0 0 260 160\" font-family=\"'Barlow', sans-serif\"><desc>hatchmark v0.5.1 absolute-variance-bar</desc><rect x=\"0\" y=\"0\" width=\"260\" height=\"160\" fill=\"#FFFFFF\"/><text x=\"0\" y=\"7.5\" font-size=\"7.5\" fill=\"#333333\"><tspan x=\"0\" dy=\"0\">Alpha Corporation</tspan><tspan x=\"0\" dy=\"10\"><tspan font-weight=\"600\">Net sales ΔPL </tspan>in mEUR</tspan><tspan x=\"0\" dy=\"10\">2026 AC and PL</tspan></text><g transform=\"translate(38,36)\"><rect x=\"107\" y=\"3.47\" width=\"96.3\" height=\"13.87\" fill=\"#89B54A\"/><rect x=\"10.7\" y=\"26.27\" width=\"96.3\" height=\"13.87\" fill=\"#E2001A\"/><rect x=\"107\" y=\"49.07\" width=\"32.1\" height=\"13.87\" fill=\"#89B54A\"/><rect x=\"107\" y=\"71.87\" width=\"80.25\" height=\"13.87\" fill=\"#89B54A\"/><rect x=\"10.7\" y=\"94.67\" width=\"96.3\" height=\"13.87\" fill=\"#E2001A\"/><line x1=\"106.1\" y1=\"0\" x2=\"106.1\" y2=\"112\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"107.9\" y1=\"0\" x2=\"107.9\" y2=\"112\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"207.3\" y=\"12.4\" font-size=\"6\" fill=\"#333333\" text-anchor=\"start\">+6</text><text x=\"6.7\" y=\"35.2\" font-size=\"6\" fill=\"#333333\" text-anchor=\"end\">−6</text><text x=\"143.1\" y=\"58\" font-size=\"6\" fill=\"#333333\" text-anchor=\"start\">+2</text><text x=\"191.25\" y=\"80.8\" font-size=\"6\" fill=\"#333333\" text-anchor=\"start\">+5</text><text x=\"6.7\" y=\"103.6\" font-size=\"6\" fill=\"#333333\" text-anchor=\"end\">−6</text><text x=\"-4\" y=\"12.57\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">North</text><text x=\"-4\" y=\"35.37\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">South</text><text x=\"-4\" y=\"58.17\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">East</text><text x=\"-4\" y=\"80.97\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">West</text><text x=\"-4\" y=\"103.77\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">Central</text></g></svg>"
+    },
+    {
+      "id": "absolute-variance-column",
+      "kind": "chart",
+      "name": "Absolute variance columns (time series)",
+      "family": "time-series-columns",
+      "status": "draft",
+      "purpose": "The absolute difference between a compared scenario (AC, continuing as FC) and a baseline scenario (PL/BU/PY) per period, drawn as columns rising or hanging from a zero line and coloured by business impact.",
+      "notation": {
+        "variance_colouring": {
+          "by": "business impact (good_direction of the measure), not raw sign",
+          "desirable": "impact-desirable",
+          "undesirable": "impact-undesirable"
+        },
+        "minuend_scenario_fills": {
+          "treatment": "Variance columns carry the scenario notation of the compared value (the minuend): solid impact-coloured fill when it is AC, hatched when it is FC, and outlined in the special case where the minuend is PL.\n",
+          "provenance": {
+            "basis": "standard",
+            "sources": [
+              {
+                "doc": "IBCS 2.0",
+                "section": "UN 4.1",
+                "note": "stated in the absolute-variances subsection (p.52); verified 2026-08-29"
+              }
+            ]
+          }
+        },
+        "data_labels": {
+          "format": "signed (\"+5\", \"-3\")",
+          "placement": "outside-end"
+        },
+        "title_block": "required (variance titles name the comparison, e.g. \"ΔPL\")"
+      },
+      "geometry": {
+        "category_width_ratio": "absolute",
+        "zero_line": "rendered across the plot at value 0",
+        "value_axis": "spans the variance range; zero need not sit at the bottom"
+      },
+      "data_contract": {
+        "dimension": {
+          "type": "time",
+          "granularities": [
+            "weekly",
+            "4-week",
+            "monthly",
+            "quarterly",
+            "annual"
+          ]
+        },
+        "series": {
+          "min": 2,
+          "scenarios_allowed": [
+            "AC",
+            "PY",
+            "PL",
+            "BU",
+            "FC"
+          ],
+          "notes": "One baseline scenario plus at least one compared scenario."
+        },
+        "derived": {
+          "value": "compare - baseline",
+          "compare": "first non-null per period among [AC, FC]",
+          "baseline": "PL (default; BU or PY where PL absent)"
+        }
+      },
+      "anti_patterns": [
+        "Colouring variance bars by scenario instead of by impact.",
+        "Colouring by raw sign when the measure's good direction is 'down' (e.g. cost)."
+      ],
+      "applies_rules": [
+        "variance-needs-baseline"
+      ],
+      "basis": "standard",
+      "citations": [
+        "IBCS 2.0 UN 4.1 — impact colouring audited 2026-08-29 — by business impact, not raw sign; the donor renderer coloured by sign only, hatchmark follows the standard",
+        "IBCS 2.0 CO 4.2 — reference-scenario design on the variance baseline"
+      ],
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"260\" height=\"160\" viewBox=\"0 0 260 160\" font-family=\"'Barlow', sans-serif\"><desc>hatchmark v0.5.1 absolute-variance-column</desc><defs><pattern id=\"hm-absolute-variance-column-hatch-desirable\" patternUnits=\"userSpaceOnUse\" width=\"4\" height=\"4\" patternTransform=\"rotate(45)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"4\" stroke=\"#89B54A\" stroke-width=\"1.5\"/></pattern><pattern id=\"hm-absolute-variance-column-hatch-neutral\" patternUnits=\"userSpaceOnUse\" width=\"4\" height=\"4\" patternTransform=\"rotate(45)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"4\" stroke=\"#0066CC\" stroke-width=\"1.5\"/></pattern></defs><rect x=\"0\" y=\"0\" width=\"260\" height=\"160\" fill=\"#FFFFFF\"/><text x=\"0\" y=\"7.5\" font-size=\"7.5\" fill=\"#333333\"><tspan x=\"0\" dy=\"0\">Alpha Corporation</tspan><tspan x=\"0\" dy=\"10\"><tspan font-weight=\"600\">Net sales ΔPL </tspan>in mEUR</tspan><tspan x=\"0\" dy=\"10\">2026 AC&amp;FC and PL</tspan></text><g transform=\"translate(2,36)\"><rect x=\"3.19\" y=\"56\" width=\"12.78\" height=\"13.75\" fill=\"#E2001A\"/><rect x=\"24.36\" y=\"42.25\" width=\"12.78\" height=\"13.75\" fill=\"#89B54A\"/><rect x=\"45.53\" y=\"56\" width=\"12.78\" height=\"18.33\" fill=\"#E2001A\"/><rect x=\"66.69\" y=\"46.84\" width=\"12.78\" height=\"9.16\" fill=\"#89B54A\"/><rect x=\"87.86\" y=\"33.09\" width=\"12.78\" height=\"22.91\" fill=\"#89B54A\"/><rect x=\"109.03\" y=\"23.93\" width=\"12.78\" height=\"32.07\" fill=\"#89B54A\"/><rect x=\"130.19\" y=\"46.84\" width=\"12.78\" height=\"9.16\" fill=\"url(#hm-absolute-variance-column-hatch-desirable)\" stroke=\"#89B54A\" stroke-width=\"0.5\"/><rect x=\"151.36\" y=\"56\" width=\"12.78\" height=\"0\" fill=\"url(#hm-absolute-variance-column-hatch-neutral)\" stroke=\"#0066CC\" stroke-width=\"0.5\"/><rect x=\"172.53\" y=\"37.67\" width=\"12.78\" height=\"18.33\" fill=\"url(#hm-absolute-variance-column-hatch-desirable)\" stroke=\"#89B54A\" stroke-width=\"0.5\"/><rect x=\"193.69\" y=\"23.93\" width=\"12.78\" height=\"32.07\" fill=\"url(#hm-absolute-variance-column-hatch-desirable)\" stroke=\"#89B54A\" stroke-width=\"0.5\"/><rect x=\"214.86\" y=\"37.67\" width=\"12.78\" height=\"18.33\" fill=\"url(#hm-absolute-variance-column-hatch-desirable)\" stroke=\"#89B54A\" stroke-width=\"0.5\"/><rect x=\"236.03\" y=\"5.6\" width=\"12.78\" height=\"50.4\" fill=\"url(#hm-absolute-variance-column-hatch-desirable)\" stroke=\"#89B54A\" stroke-width=\"0.5\"/><line x1=\"0\" y1=\"55.1\" x2=\"252\" y2=\"55.1\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"0\" y1=\"56.9\" x2=\"252\" y2=\"56.9\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"9.58\" y=\"76.75\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">−3</text><text x=\"30.75\" y=\"40.25\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+3</text><text x=\"51.92\" y=\"81.33\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">−4</text><text x=\"73.08\" y=\"44.84\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+2</text><text x=\"94.25\" y=\"31.09\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+5</text><text x=\"115.42\" y=\"21.93\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+7</text><text x=\"136.58\" y=\"44.84\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+2</text><text x=\"157.75\" y=\"54\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">0</text><text x=\"178.92\" y=\"35.67\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+4</text><text x=\"200.08\" y=\"21.93\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+7</text><text x=\"221.25\" y=\"35.67\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+4</text><text x=\"242.42\" y=\"3.6\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+11</text><text x=\"9.58\" y=\"121.5\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Jan</text><text x=\"30.75\" y=\"121.5\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Feb</text><text x=\"51.92\" y=\"121.5\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Mar</text><text x=\"73.08\" y=\"121.5\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Apr</text><text x=\"94.25\" y=\"121.5\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">May</text><text x=\"115.42\" y=\"121.5\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Jun</text><text x=\"136.58\" y=\"121.5\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Jul</text><text x=\"157.75\" y=\"121.5\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Aug</text><text x=\"178.92\" y=\"121.5\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Sep</text><text x=\"200.08\" y=\"121.5\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Oct</text><text x=\"221.25\" y=\"121.5\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Nov</text><text x=\"242.42\" y=\"121.5\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Dec</text></g></svg>"
+    },
+    {
+      "id": "basic-area",
+      "kind": "chart",
+      "name": "Area chart (time series)",
+      "family": "time-series-lines",
+      "status": "draft",
+      "purpose": "A filled measure over time: solid fill under measured spans, hatched fill under forecast spans, with the boundary line on top.",
+      "notation": {
+        "area_fill": "solid for measured spans, hatched for forecast spans (UN 3.2 applied to fills)",
+        "title_block": "required"
+      },
+      "geometry": null,
+      "data_contract": {
+        "dimension": {
+          "type": "time",
+          "granularities": [
+            "weekly",
+            "4-week",
+            "monthly",
+            "quarterly",
+            "annual"
+          ]
+        },
+        "series": {
+          "min": 1,
+          "scenarios_allowed": [
+            "AC",
+            "FC"
+          ]
+        }
+      },
+      "anti_patterns": null,
+      "applies_rules": [
+        "zero-baseline",
+        "scenario-notation"
+      ],
+      "basis": "interpretation",
+      "citations": [
+        "IBCS 2.0 UN 3.2 fill semantics applied to areas"
+      ],
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"260\" height=\"160\" viewBox=\"0 0 260 160\" font-family=\"'Barlow', sans-serif\"><desc>hatchmark v0.5.1 basic-area</desc><defs><pattern id=\"hm-basic-area-hatch-0\" patternUnits=\"userSpaceOnUse\" width=\"4\" height=\"4\" patternTransform=\"rotate(45)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"4\" stroke=\"#333333\" stroke-width=\"1.5\"/></pattern></defs><rect x=\"0\" y=\"0\" width=\"260\" height=\"160\" fill=\"#FFFFFF\"/><text x=\"17.240000000000002\" y=\"7.5\" font-size=\"7.5\" fill=\"#333333\"><tspan x=\"17.240000000000002\" dy=\"0\">Alpha Corporation</tspan><tspan x=\"17.240000000000002\" dy=\"10\"><tspan font-weight=\"600\">Net sales </tspan>in mEUR</tspan><tspan x=\"17.240000000000002\" dy=\"10\">2026 AC&amp;FC</tspan></text><text x=\"26\" y=\"43.5\" font-size=\"7.5\" fill=\"#333333\" text-anchor=\"end\">mEUR</text><g transform=\"translate(28,44.5)\"><line x1=\"0\" y1=\"103.5\" x2=\"226\" y2=\"103.5\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><line x1=\"0\" y1=\"69\" x2=\"226\" y2=\"69\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><line x1=\"0\" y1=\"34.5\" x2=\"226\" y2=\"34.5\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><line x1=\"0\" y1=\"0\" x2=\"226\" y2=\"0\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"103.5\" stroke=\"#333333\" stroke-width=\"0.75\"/><line x1=\"-3\" y1=\"103.5\" x2=\"0\" y2=\"103.5\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"-4\" y=\"106\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">0</text><line x1=\"-3\" y1=\"69\" x2=\"0\" y2=\"69\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"-4\" y=\"71.5\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">30</text><line x1=\"-3\" y1=\"34.5\" x2=\"0\" y2=\"34.5\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"-4\" y=\"37\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">60</text><line x1=\"-3\" y1=\"0\" x2=\"0\" y2=\"0\" stroke=\"#333333\" stroke-width=\"0.5\"/><path d=\"M 8.5 37.95 L 27.5 31.05000000000001 L 27.5 103.5 L 8.5 103.5 Z\" fill=\"#333333\" fill-opacity=\"0.9\" stroke=\"none\"/><path d=\"M 27.5 31.05000000000001 L 46.5 36.8 L 46.5 103.5 L 27.5 103.5 Z\" fill=\"#333333\" fill-opacity=\"0.9\" stroke=\"none\"/><path d=\"M 46.5 36.8 L 65.5 29.89999999999999 L 65.5 103.5 L 46.5 103.5 Z\" fill=\"#333333\" fill-opacity=\"0.9\" stroke=\"none\"/><path d=\"M 65.5 29.89999999999999 L 84.5 24.14999999999999 L 84.5 103.5 L 65.5 103.5 Z\" fill=\"#333333\" fill-opacity=\"0.9\" stroke=\"none\"/><path d=\"M 84.5 24.14999999999999 L 103.5 21.85000000000001 L 103.5 103.5 L 84.5 103.5 Z\" fill=\"#333333\" fill-opacity=\"0.9\" stroke=\"none\"/><path d=\"M 103.5 21.85000000000001 L 122.5 25.299999999999997 L 122.5 103.5 L 103.5 103.5 Z\" fill=\"url(#hm-basic-area-hatch-0)\" fill-opacity=\"1\" stroke=\"none\"/><path d=\"M 122.5 25.299999999999997 L 141.5 27.60000000000001 L 141.5 103.5 L 122.5 103.5 Z\" fill=\"url(#hm-basic-area-hatch-0)\" fill-opacity=\"1\" stroke=\"none\"/><path d=\"M 141.5 27.60000000000001 L 160.5 20.69999999999999 L 160.5 103.5 L 141.5 103.5 Z\" fill=\"url(#hm-basic-area-hatch-0)\" fill-opacity=\"1\" stroke=\"none\"/><path d=\"M 160.5 20.69999999999999 L 179.5 17.25 L 179.5 103.5 L 160.5 103.5 Z\" fill=\"url(#hm-basic-area-hatch-0)\" fill-opacity=\"1\" stroke=\"none\"/><path d=\"M 179.5 17.25 L 198.5 18.400000000000006 L 198.5 103.5 L 179.5 103.5 Z\" fill=\"url(#hm-basic-area-hatch-0)\" fill-opacity=\"1\" stroke=\"none\"/><path d=\"M 198.5 18.400000000000006 L 217.5 10.349999999999994 L 217.5 103.5 L 198.5 103.5 Z\" fill=\"url(#hm-basic-area-hatch-0)\" fill-opacity=\"1\" stroke=\"none\"/><line x1=\"8.5\" y1=\"37.95\" x2=\"27.5\" y2=\"31.05\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-linecap=\"round\"/><line x1=\"27.5\" y1=\"31.05\" x2=\"46.5\" y2=\"36.8\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-linecap=\"round\"/><line x1=\"46.5\" y1=\"36.8\" x2=\"65.5\" y2=\"29.9\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-linecap=\"round\"/><line x1=\"65.5\" y1=\"29.9\" x2=\"84.5\" y2=\"24.15\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-linecap=\"round\"/><line x1=\"84.5\" y1=\"24.15\" x2=\"103.5\" y2=\"21.85\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-linecap=\"round\"/><line x1=\"103.5\" y1=\"21.85\" x2=\"122.5\" y2=\"25.3\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-dasharray=\"4,2\" stroke-linecap=\"round\"/><line x1=\"122.5\" y1=\"25.3\" x2=\"141.5\" y2=\"27.6\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-dasharray=\"4,2\" stroke-linecap=\"round\"/><line x1=\"141.5\" y1=\"27.6\" x2=\"160.5\" y2=\"20.7\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-dasharray=\"4,2\" stroke-linecap=\"round\"/><line x1=\"160.5\" y1=\"20.7\" x2=\"179.5\" y2=\"17.25\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-dasharray=\"4,2\" stroke-linecap=\"round\"/><line x1=\"179.5\" y1=\"17.25\" x2=\"198.5\" y2=\"18.4\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-dasharray=\"4,2\" stroke-linecap=\"round\"/><line x1=\"198.5\" y1=\"18.4\" x2=\"217.5\" y2=\"10.35\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-dasharray=\"4,2\" stroke-linecap=\"round\"/><line x1=\"0\" y1=\"103.5\" x2=\"226\" y2=\"103.5\" stroke=\"#333333\" stroke-width=\"0.75\"/><text x=\"8.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Jan</text><text x=\"27.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Feb</text><text x=\"46.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Mar</text><text x=\"65.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Apr</text><text x=\"84.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">May</text><text x=\"103.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Jun</text><text x=\"122.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Jul</text><text x=\"141.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Aug</text><text x=\"160.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Sep</text><text x=\"179.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Oct</text><text x=\"198.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Nov</text><text x=\"217.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Dec</text></g></svg>"
+    },
+    {
+      "id": "basic-bar",
+      "kind": "chart",
+      "name": "Bar chart (structure)",
+      "family": "structure-bars",
+      "status": "draft",
+      "purpose": "A measure across categories (regions, products, entities) as horizontal bars — the structure counterpart of basic-column, category labels on the left, scenario identity in the fill.",
+      "notation": {
+        "scenario_fills": "required",
+        "measure_type": "absolute (2/3 of row height)",
+        "data_labels": {
+          "placement": "beyond bar end",
+          "optional": true
+        },
+        "title_block": "required"
+      },
+      "geometry": null,
+      "data_contract": {
+        "dimension": {
+          "type": "structure"
+        },
+        "series": {
+          "min": 1,
+          "scenarios_allowed": [
+            "AC",
+            "PY",
+            "PL",
+            "BU",
+            "FC"
+          ]
+        }
+      },
+      "anti_patterns": null,
+      "applies_rules": [
+        "zero-baseline",
+        "scenario-notation"
+      ],
+      "basis": "standard",
+      "citations": [
+        "IBCS 2.0 UN 3.1 — bar widths mirror column widths"
+      ],
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"260\" height=\"160\" viewBox=\"0 0 260 160\" font-family=\"'Barlow', sans-serif\"><desc>hatchmark v0.5.1 basic-bar</desc><rect x=\"0\" y=\"0\" width=\"260\" height=\"160\" fill=\"#FFFFFF\"/><text x=\"0\" y=\"7.5\" font-size=\"7.5\" fill=\"#333333\"><tspan x=\"0\" dy=\"0\">Alpha Corporation</tspan><tspan x=\"0\" dy=\"10\"><tspan font-weight=\"600\">Net sales </tspan>in mEUR</tspan><tspan x=\"0\" dy=\"10\">2026 AC and PL</tspan></text><text x=\"252\" y=\"43.5\" font-size=\"7.5\" fill=\"#333333\" text-anchor=\"end\">mEUR</text><g transform=\"translate(38,36)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"112\" stroke=\"#333333\" stroke-width=\"0.75\"/><rect x=\"0\" y=\"3.47\" width=\"186.09\" height=\"6.93\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"0\" y=\"10.4\" width=\"173.1\" height=\"6.93\" fill=\"transparent\" stroke=\"#333333\" stroke-width=\"1.5\"/><rect x=\"0\" y=\"26.27\" width=\"138.48\" height=\"6.93\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"0\" y=\"33.2\" width=\"151.47\" height=\"6.93\" fill=\"transparent\" stroke=\"#333333\" stroke-width=\"1.5\"/><rect x=\"0\" y=\"49.07\" width=\"101.7\" height=\"6.93\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"0\" y=\"56\" width=\"97.37\" height=\"6.93\" fill=\"transparent\" stroke=\"#333333\" stroke-width=\"1.5\"/><rect x=\"0\" y=\"71.87\" width=\"153.63\" height=\"6.93\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"0\" y=\"78.8\" width=\"142.81\" height=\"6.93\" fill=\"transparent\" stroke=\"#333333\" stroke-width=\"1.5\"/><rect x=\"0\" y=\"94.67\" width=\"60.59\" height=\"6.93\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"0\" y=\"101.6\" width=\"73.57\" height=\"6.93\" fill=\"transparent\" stroke=\"#333333\" stroke-width=\"1.5\"/><text x=\"189.09\" y=\"8.93\" font-size=\"6\" fill=\"#333333\" text-anchor=\"start\">86</text><text x=\"176.1\" y=\"15.87\" font-size=\"6\" fill=\"#333333\" text-anchor=\"start\">80</text><text x=\"141.48\" y=\"31.73\" font-size=\"6\" fill=\"#333333\" text-anchor=\"start\">64</text><text x=\"154.47\" y=\"38.67\" font-size=\"6\" fill=\"#333333\" text-anchor=\"start\">70</text><text x=\"104.7\" y=\"54.53\" font-size=\"6\" fill=\"#333333\" text-anchor=\"start\">47</text><text x=\"100.37\" y=\"61.47\" font-size=\"6\" fill=\"#333333\" text-anchor=\"start\">45</text><text x=\"156.63\" y=\"77.33\" font-size=\"6\" fill=\"#333333\" text-anchor=\"start\">71</text><text x=\"145.81\" y=\"84.27\" font-size=\"6\" fill=\"#333333\" text-anchor=\"start\">66</text><text x=\"63.59\" y=\"100.13\" font-size=\"6\" fill=\"#333333\" text-anchor=\"start\">28</text><text x=\"76.57\" y=\"107.07\" font-size=\"6\" fill=\"#333333\" text-anchor=\"start\">34</text><text x=\"-4\" y=\"12.57\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">North</text><text x=\"-4\" y=\"35.37\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">South</text><text x=\"-4\" y=\"58.17\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">East</text><text x=\"-4\" y=\"80.97\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">West</text><text x=\"-4\" y=\"103.77\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">Central</text></g></svg>"
+    },
+    {
+      "id": "basic-column",
+      "kind": "chart",
+      "name": "Column chart (time series)",
+      "family": "time-series-columns",
+      "status": "draft",
+      "purpose": "The default chart for a measure developing over time. Vertical columns on a horizontal time axis; scenario identity carried by fill treatment (AC solid dark, FC hatched, PL/BU outlined, PY solid light).",
+      "notation": {
+        "scenario_fills": "required",
+        "measure_type": "absolute",
+        "data_labels": {
+          "placement": "outside-end (above positive values, below negative values)",
+          "optional": true
+        },
+        "title_block": "required"
+      },
+      "geometry": {
+        "category_width_ratio": "absolute",
+        "value_axis": "starts at zero; ticks and labels, unit label at top",
+        "negative_values": "columns hang below the zero baseline"
+      },
+      "data_contract": {
+        "dimension": {
+          "type": "time",
+          "granularities": [
+            "weekly",
+            "4-week",
+            "monthly",
+            "quarterly",
+            "annual"
+          ]
+        },
+        "series": {
+          "min": 1,
+          "scenarios_allowed": [
+            "AC",
+            "PY",
+            "PL",
+            "BU",
+            "FC"
+          ],
+          "notes": "Series may be sparse (null-padded); a period renders one column per series with a value in that period.\n"
+        }
+      },
+      "anti_patterns": [
+        "Introducing a new hue to distinguish plan or forecast from actuals.",
+        "Truncating the value axis to dramatise small changes."
+      ],
+      "applies_rules": [
+        "zero-baseline",
+        "scenario-notation"
+      ],
+      "basis": "standard",
+      "citations": [
+        "IBCS 2.0 UN 3.1 — 2/3 category width for absolute measures; audited 2026-08-29",
+        "IBCS 2.0 UN 3.2 — scenario fills; audited 2026-08-29",
+        "IBCS 2.0 CH 1.1 — zero baseline; audited 2026-08-29",
+        "IBCS 2.0 UN 2.2 — three-line title block; audited 2026-08-29"
+      ],
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"260\" height=\"160\" viewBox=\"0 0 260 160\" font-family=\"'Barlow', sans-serif\"><desc>hatchmark v0.5.1 basic-column</desc><defs><pattern id=\"hm-basic-column-hatch-0\" patternUnits=\"userSpaceOnUse\" width=\"4\" height=\"4\" patternTransform=\"rotate(45)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"4\" stroke=\"#333333\" stroke-width=\"1.5\"/></pattern></defs><rect x=\"0\" y=\"0\" width=\"260\" height=\"160\" fill=\"#FFFFFF\"/><text x=\"17.240000000000002\" y=\"7.5\" font-size=\"7.5\" fill=\"#333333\"><tspan x=\"17.240000000000002\" dy=\"0\">Alpha Corporation</tspan><tspan x=\"17.240000000000002\" dy=\"10\"><tspan font-weight=\"600\">Net sales </tspan>in mEUR</tspan><tspan x=\"17.240000000000002\" dy=\"10\">2026 AC&amp;FC</tspan></text><text x=\"26\" y=\"43.5\" font-size=\"7.5\" fill=\"#333333\" text-anchor=\"end\">mEUR</text><g transform=\"translate(28,44.5)\"><line x1=\"0\" y1=\"103.5\" x2=\"226\" y2=\"103.5\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><line x1=\"0\" y1=\"69\" x2=\"226\" y2=\"69\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><line x1=\"0\" y1=\"34.5\" x2=\"226\" y2=\"34.5\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><line x1=\"0\" y1=\"0\" x2=\"226\" y2=\"0\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"103.5\" stroke=\"#333333\" stroke-width=\"0.75\"/><line x1=\"-3\" y1=\"103.5\" x2=\"0\" y2=\"103.5\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"-4\" y=\"106\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">0</text><line x1=\"-3\" y1=\"69\" x2=\"0\" y2=\"69\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"-4\" y=\"71.5\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">30</text><line x1=\"-3\" y1=\"34.5\" x2=\"0\" y2=\"34.5\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"-4\" y=\"37\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">60</text><line x1=\"-3\" y1=\"0\" x2=\"0\" y2=\"0\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"2.83\" y=\"37.95\" width=\"11.33\" height=\"65.55\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"21.83\" y=\"31.05\" width=\"11.33\" height=\"72.45\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"40.83\" y=\"36.8\" width=\"11.33\" height=\"66.7\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"59.83\" y=\"29.9\" width=\"11.33\" height=\"73.6\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"78.83\" y=\"24.15\" width=\"11.33\" height=\"79.35\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"97.83\" y=\"21.85\" width=\"11.33\" height=\"81.65\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"116.83\" y=\"25.3\" width=\"11.33\" height=\"78.2\" fill=\"url(#hm-basic-column-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"135.83\" y=\"27.6\" width=\"11.33\" height=\"75.9\" fill=\"url(#hm-basic-column-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"154.83\" y=\"20.7\" width=\"11.33\" height=\"82.8\" fill=\"url(#hm-basic-column-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"173.83\" y=\"17.25\" width=\"11.33\" height=\"86.25\" fill=\"url(#hm-basic-column-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"192.83\" y=\"18.4\" width=\"11.33\" height=\"85.1\" fill=\"url(#hm-basic-column-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"211.83\" y=\"10.35\" width=\"11.33\" height=\"93.15\" fill=\"url(#hm-basic-column-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"0\" y1=\"103.5\" x2=\"226\" y2=\"103.5\" stroke=\"#333333\" stroke-width=\"0.75\"/><text x=\"8.5\" y=\"35.95\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">57</text><text x=\"27.5\" y=\"29.05\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">63</text><text x=\"46.5\" y=\"34.8\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">58</text><text x=\"65.5\" y=\"27.9\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">64</text><text x=\"84.5\" y=\"22.15\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">69</text><text x=\"103.5\" y=\"19.85\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">71</text><text x=\"122.5\" y=\"23.3\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">68</text><text x=\"141.5\" y=\"25.6\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">66</text><text x=\"160.5\" y=\"18.7\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">72</text><text x=\"179.5\" y=\"15.25\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">75</text><text x=\"198.5\" y=\"16.4\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">74</text><text x=\"217.5\" y=\"8.35\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">81</text><text x=\"8.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Jan</text><text x=\"27.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Feb</text><text x=\"46.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Mar</text><text x=\"65.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Apr</text><text x=\"84.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">May</text><text x=\"103.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Jun</text><text x=\"122.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Jul</text><text x=\"141.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Aug</text><text x=\"160.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Sep</text><text x=\"179.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Oct</text><text x=\"198.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Nov</text><text x=\"217.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Dec</text></g></svg>"
+    },
+    {
+      "id": "basic-line",
+      "kind": "chart",
+      "name": "Line chart (time series)",
+      "family": "time-series-lines",
+      "status": "draft",
+      "purpose": "A measure over many periods as a line. Stroke pattern carries scenario identity (solid measured, long-dash plan, short-dash forecast); the compare pair renders as one line switching style at the actuals boundary. Thick strokes mark absolute measures (UN 3.1).",
+      "notation": {
+        "scenario_line_dashes": "per notation/geometry.yaml (solid / 6,3 / 4,2)",
+        "line_width": "absolute (thick)",
+        "data_labels": {
+          "placement": "above points",
+          "optional": true
+        },
+        "title_block": "required"
+      },
+      "geometry": {
+        "points": "category band centres; null values break the line"
+      },
+      "data_contract": {
+        "dimension": {
+          "type": "time",
+          "granularities": [
+            "weekly",
+            "4-week",
+            "monthly",
+            "quarterly",
+            "annual"
+          ]
+        },
+        "series": {
+          "min": 1,
+          "scenarios_allowed": [
+            "AC",
+            "PY",
+            "PL",
+            "BU",
+            "FC"
+          ]
+        }
+      },
+      "anti_patterns": null,
+      "applies_rules": [
+        "zero-baseline",
+        "scenario-notation"
+      ],
+      "basis": "standard",
+      "citations": [
+        "IBCS 2.0 UN 3.1 — thick/thin line widths",
+        "IBCS 2.0 UN 3.2 — scenario semantics; dash mapping is house-style"
+      ],
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"260\" height=\"160\" viewBox=\"0 0 260 160\" font-family=\"'Barlow', sans-serif\"><desc>hatchmark v0.5.1 basic-line</desc><rect x=\"0\" y=\"0\" width=\"260\" height=\"160\" fill=\"#FFFFFF\"/><text x=\"17.240000000000002\" y=\"7.5\" font-size=\"7.5\" fill=\"#333333\"><tspan x=\"17.240000000000002\" dy=\"0\">Alpha Corporation</tspan><tspan x=\"17.240000000000002\" dy=\"10\"><tspan font-weight=\"600\">Net sales </tspan>in mEUR</tspan><tspan x=\"17.240000000000002\" dy=\"10\">2026 AC&amp;FC and PL</tspan></text><text x=\"26\" y=\"43.5\" font-size=\"7.5\" fill=\"#333333\" text-anchor=\"end\">mEUR</text><g transform=\"translate(28,44.5)\"><line x1=\"0\" y1=\"103.5\" x2=\"226\" y2=\"103.5\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><line x1=\"0\" y1=\"69\" x2=\"226\" y2=\"69\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><line x1=\"0\" y1=\"34.5\" x2=\"226\" y2=\"34.5\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><line x1=\"0\" y1=\"0\" x2=\"226\" y2=\"0\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"103.5\" stroke=\"#333333\" stroke-width=\"0.75\"/><line x1=\"-3\" y1=\"103.5\" x2=\"0\" y2=\"103.5\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"-4\" y=\"106\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">0</text><line x1=\"-3\" y1=\"69\" x2=\"0\" y2=\"69\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"-4\" y=\"71.5\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">30</text><line x1=\"-3\" y1=\"34.5\" x2=\"0\" y2=\"34.5\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"-4\" y=\"37\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">60</text><line x1=\"-3\" y1=\"0\" x2=\"0\" y2=\"0\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"8.5\" y1=\"37.95\" x2=\"27.5\" y2=\"31.05\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-linecap=\"round\"/><line x1=\"27.5\" y1=\"31.05\" x2=\"46.5\" y2=\"36.8\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-linecap=\"round\"/><line x1=\"46.5\" y1=\"36.8\" x2=\"65.5\" y2=\"29.9\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-linecap=\"round\"/><line x1=\"65.5\" y1=\"29.9\" x2=\"84.5\" y2=\"24.15\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-linecap=\"round\"/><line x1=\"84.5\" y1=\"24.15\" x2=\"103.5\" y2=\"21.85\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-linecap=\"round\"/><line x1=\"103.5\" y1=\"21.85\" x2=\"122.5\" y2=\"25.3\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-dasharray=\"4,2\" stroke-linecap=\"round\"/><line x1=\"122.5\" y1=\"25.3\" x2=\"141.5\" y2=\"27.6\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-dasharray=\"4,2\" stroke-linecap=\"round\"/><line x1=\"141.5\" y1=\"27.6\" x2=\"160.5\" y2=\"20.7\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-dasharray=\"4,2\" stroke-linecap=\"round\"/><line x1=\"160.5\" y1=\"20.7\" x2=\"179.5\" y2=\"17.25\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-dasharray=\"4,2\" stroke-linecap=\"round\"/><line x1=\"179.5\" y1=\"17.25\" x2=\"198.5\" y2=\"18.4\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-dasharray=\"4,2\" stroke-linecap=\"round\"/><line x1=\"198.5\" y1=\"18.4\" x2=\"217.5\" y2=\"10.35\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-dasharray=\"4,2\" stroke-linecap=\"round\"/><line x1=\"8.5\" y1=\"34.5\" x2=\"27.5\" y2=\"34.5\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-dasharray=\"6,3\" stroke-linecap=\"round\"/><line x1=\"27.5\" y1=\"34.5\" x2=\"46.5\" y2=\"32.2\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-dasharray=\"6,3\" stroke-linecap=\"round\"/><line x1=\"46.5\" y1=\"32.2\" x2=\"65.5\" y2=\"32.2\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-dasharray=\"6,3\" stroke-linecap=\"round\"/><line x1=\"65.5\" y1=\"32.2\" x2=\"84.5\" y2=\"29.9\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-dasharray=\"6,3\" stroke-linecap=\"round\"/><line x1=\"84.5\" y1=\"29.9\" x2=\"103.5\" y2=\"29.9\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-dasharray=\"6,3\" stroke-linecap=\"round\"/><line x1=\"103.5\" y1=\"29.9\" x2=\"122.5\" y2=\"27.6\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-dasharray=\"6,3\" stroke-linecap=\"round\"/><line x1=\"122.5\" y1=\"27.6\" x2=\"141.5\" y2=\"27.6\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-dasharray=\"6,3\" stroke-linecap=\"round\"/><line x1=\"141.5\" y1=\"27.6\" x2=\"160.5\" y2=\"25.3\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-dasharray=\"6,3\" stroke-linecap=\"round\"/><line x1=\"160.5\" y1=\"25.3\" x2=\"179.5\" y2=\"25.3\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-dasharray=\"6,3\" stroke-linecap=\"round\"/><line x1=\"179.5\" y1=\"25.3\" x2=\"198.5\" y2=\"23\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-dasharray=\"6,3\" stroke-linecap=\"round\"/><line x1=\"198.5\" y1=\"23\" x2=\"217.5\" y2=\"23\" stroke=\"#333333\" stroke-width=\"2.4\" stroke-dasharray=\"6,3\" stroke-linecap=\"round\"/><line x1=\"0\" y1=\"103.5\" x2=\"226\" y2=\"103.5\" stroke=\"#333333\" stroke-width=\"0.75\"/><text x=\"8.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Jan</text><text x=\"27.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Feb</text><text x=\"46.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Mar</text><text x=\"65.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Apr</text><text x=\"84.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">May</text><text x=\"103.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Jun</text><text x=\"122.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Jul</text><text x=\"141.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Aug</text><text x=\"160.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Sep</text><text x=\"179.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Oct</text><text x=\"198.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Nov</text><text x=\"217.5\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Dec</text></g></svg>"
+    },
+    {
+      "id": "column-with-variance",
+      "kind": "chart",
+      "name": "Column chart with variance tiers",
+      "family": "time-series-columns",
+      "status": "draft",
+      "purpose": "The multi-tier report chart: ΔPL% pins topmost, ΔPL columns beneath, the base measure at the bottom — every period aligned vertically so what, Δ and Δ% read as one glance (CO 4.2 places secondary tiers above column charts).",
+      "notation": {
+        "tier_labels": "ΔPL / ΔPL% at each tier's top-left",
+        "variance_colouring": {
+          "by": "business impact (good_direction)"
+        },
+        "scenario_fills": "required on the base chart",
+        "title_block": "required"
+      },
+      "geometry": {
+        "tier_height_ratio": "0.22 each (house-style)",
+        "base_axis": "always starts at zero (enforced by the renderer)"
+      },
+      "data_contract": {
+        "dimension": {
+          "type": "time",
+          "granularities": [
+            "weekly",
+            "4-week",
+            "monthly",
+            "quarterly",
+            "annual"
+          ]
+        },
+        "series": {
+          "min": 2,
+          "scenarios_allowed": [
+            "AC",
+            "PY",
+            "PL",
+            "BU",
+            "FC"
+          ]
+        },
+        "derived": {
+          "compare": "first non-null among [AC, FC]",
+          "baseline": "PL default",
+          "tiers": "[relative, absolute] by default"
+        }
+      },
+      "anti_patterns": null,
+      "applies_rules": [
+        "variance-needs-baseline",
+        "scenario-notation"
+      ],
+      "basis": "standard",
+      "citations": [
+        "IBCS 2.0 CO 4.2 — tier placement and reduplicated axes; the 22% tier height is ours",
+        "IBCS 2.0 UN 4.1"
+      ],
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"260\" height=\"160\" viewBox=\"0 0 260 160\" font-family=\"'Barlow', sans-serif\"><desc>hatchmark v0.5.1 column-with-variance</desc><defs><pattern id=\"hm-column-with-variance-hatch-0\" patternUnits=\"userSpaceOnUse\" width=\"4\" height=\"4\" patternTransform=\"rotate(45)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"4\" stroke=\"#333333\" stroke-width=\"1.5\"/></pattern><pattern id=\"hm-column-with-variance-hatch-1\" patternUnits=\"userSpaceOnUse\" width=\"4\" height=\"4\" patternTransform=\"rotate(45)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"4\" stroke=\"#89B54A\" stroke-width=\"1.5\"/></pattern></defs><rect x=\"0\" y=\"0\" width=\"260\" height=\"160\" fill=\"#FFFFFF\"/><text x=\"17.240000000000002\" y=\"7.5\" font-size=\"7.5\" fill=\"#333333\"><tspan x=\"17.240000000000002\" dy=\"0\">Alpha Corporation</tspan><tspan x=\"17.240000000000002\" dy=\"10\"><tspan font-weight=\"600\">Net sales </tspan>in mEUR</tspan><tspan x=\"17.240000000000002\" dy=\"10\">2026 AC&amp;FC and PL</tspan></text><text x=\"26\" y=\"43.5\" font-size=\"7.5\" fill=\"#333333\" text-anchor=\"end\">mEUR</text><g transform=\"translate(28,44.5)\"><g transform=\"translate(0,0)\"><text x=\"-3\" y=\"5.5\" font-size=\"5.5\" fill=\"#333333\" text-anchor=\"end\">ΔPL%</text><rect x=\"8\" y=\"11.39\" width=\"1\" height=\"2.51\" fill=\"#E2001A\"/><rect x=\"7\" y=\"12.39\" width=\"3\" height=\"3\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"27\" y=\"8.88\" width=\"1\" height=\"2.51\" fill=\"#89B54A\"/><rect x=\"26\" y=\"7.38\" width=\"3\" height=\"3\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"46\" y=\"11.39\" width=\"1\" height=\"3.24\" fill=\"#E2001A\"/><rect x=\"45\" y=\"13.12\" width=\"3\" height=\"3\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"65\" y=\"9.77\" width=\"1\" height=\"1.62\" fill=\"#89B54A\"/><rect x=\"64\" y=\"8.27\" width=\"3\" height=\"3\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"84\" y=\"7.46\" width=\"1\" height=\"3.92\" fill=\"#89B54A\"/><rect x=\"83\" y=\"5.96\" width=\"3\" height=\"3\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"103\" y=\"5.9\" width=\"1\" height=\"5.49\" fill=\"#89B54A\"/><rect x=\"102\" y=\"4.4\" width=\"3\" height=\"3\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"122\" y=\"9.86\" width=\"1\" height=\"1.52\" fill=\"#89B54A\"/><rect x=\"121\" y=\"8.36\" width=\"3\" height=\"3\" fill=\"url(#hm-column-with-variance-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"140\" y=\"9.89\" width=\"3\" height=\"3\" fill=\"url(#hm-column-with-variance-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"160\" y=\"8.43\" width=\"1\" height=\"2.95\" fill=\"#89B54A\"/><rect x=\"159\" y=\"6.93\" width=\"3\" height=\"3\" fill=\"url(#hm-column-with-variance-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"179\" y=\"6.22\" width=\"1\" height=\"5.17\" fill=\"#89B54A\"/><rect x=\"178\" y=\"4.72\" width=\"3\" height=\"3\" fill=\"url(#hm-column-with-variance-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"198\" y=\"8.52\" width=\"1\" height=\"2.87\" fill=\"#89B54A\"/><rect x=\"197\" y=\"7.02\" width=\"3\" height=\"3\" fill=\"url(#hm-column-with-variance-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"217\" y=\"3.5\" width=\"1\" height=\"7.89\" fill=\"#89B54A\"/><rect x=\"216\" y=\"2\" width=\"3\" height=\"3\" fill=\"url(#hm-column-with-variance-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"0\" y1=\"10.49\" x2=\"226\" y2=\"10.49\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"0\" y1=\"12.29\" x2=\"226\" y2=\"12.29\" stroke=\"#333333\" stroke-width=\"0.5\"/></g><g transform=\"translate(0,27.77)\"><text x=\"-3\" y=\"5.5\" font-size=\"5.5\" fill=\"#333333\" text-anchor=\"end\">ΔPL</text><rect x=\"2.83\" y=\"11.39\" width=\"11.33\" height=\"1.21\" fill=\"#E2001A\"/><text x=\"8.5\" y=\"18.55\" font-size=\"5.5\" fill=\"#333333\" text-anchor=\"middle\">−3</text><rect x=\"21.83\" y=\"10.18\" width=\"11.33\" height=\"1.21\" fill=\"#89B54A\"/><text x=\"27.5\" y=\"8.18\" font-size=\"5.5\" fill=\"#333333\" text-anchor=\"middle\">+3</text><rect x=\"40.83\" y=\"11.39\" width=\"11.33\" height=\"1.61\" fill=\"#E2001A\"/><text x=\"46.5\" y=\"18.95\" font-size=\"5.5\" fill=\"#333333\" text-anchor=\"middle\">−4</text><rect x=\"59.83\" y=\"10.58\" width=\"11.33\" height=\"0.8\" fill=\"#89B54A\"/><text x=\"65.5\" y=\"8.58\" font-size=\"5.5\" fill=\"#333333\" text-anchor=\"middle\">+2</text><rect x=\"78.83\" y=\"9.37\" width=\"11.33\" height=\"2.01\" fill=\"#89B54A\"/><text x=\"84.5\" y=\"7.37\" font-size=\"5.5\" fill=\"#333333\" text-anchor=\"middle\">+5</text><rect x=\"97.83\" y=\"8.57\" width=\"11.33\" height=\"2.82\" fill=\"#89B54A\"/><text x=\"103.5\" y=\"6.57\" font-size=\"5.5\" fill=\"#333333\" text-anchor=\"middle\">+7</text><rect x=\"116.83\" y=\"10.58\" width=\"11.33\" height=\"0.8\" fill=\"url(#hm-column-with-variance-hatch-1)\" stroke=\"#89B54A\" stroke-width=\"0.5\"/><text x=\"122.5\" y=\"8.58\" font-size=\"5.5\" fill=\"#333333\" text-anchor=\"middle\">+2</text><text x=\"141.5\" y=\"9.39\" font-size=\"5.5\" fill=\"#333333\" text-anchor=\"middle\">0</text><rect x=\"154.83\" y=\"9.78\" width=\"11.33\" height=\"1.61\" fill=\"url(#hm-column-with-variance-hatch-1)\" stroke=\"#89B54A\" stroke-width=\"0.5\"/><text x=\"160.5\" y=\"7.78\" font-size=\"5.5\" fill=\"#333333\" text-anchor=\"middle\">+4</text><rect x=\"173.83\" y=\"8.57\" width=\"11.33\" height=\"2.82\" fill=\"url(#hm-column-with-variance-hatch-1)\" stroke=\"#89B54A\" stroke-width=\"0.5\"/><text x=\"179.5\" y=\"6.57\" font-size=\"5.5\" fill=\"#333333\" text-anchor=\"middle\">+7</text><rect x=\"192.83\" y=\"9.78\" width=\"11.33\" height=\"1.61\" fill=\"url(#hm-column-with-variance-hatch-1)\" stroke=\"#89B54A\" stroke-width=\"0.5\"/><text x=\"198.5\" y=\"7.78\" font-size=\"5.5\" fill=\"#333333\" text-anchor=\"middle\">+4</text><rect x=\"211.83\" y=\"6.96\" width=\"11.33\" height=\"4.43\" fill=\"url(#hm-column-with-variance-hatch-1)\" stroke=\"#89B54A\" stroke-width=\"0.5\"/><text x=\"217.5\" y=\"4.96\" font-size=\"5.5\" fill=\"#333333\" text-anchor=\"middle\">+11</text><line x1=\"0\" y1=\"10.49\" x2=\"226\" y2=\"10.49\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"0\" y1=\"12.29\" x2=\"226\" y2=\"12.29\" stroke=\"#333333\" stroke-width=\"0.5\"/></g><g transform=\"translate(0,55.54)\"><line x1=\"0\" y1=\"47.96\" x2=\"226\" y2=\"47.96\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><line x1=\"0\" y1=\"31.97\" x2=\"226\" y2=\"31.97\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><line x1=\"0\" y1=\"15.99\" x2=\"226\" y2=\"15.99\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><line x1=\"0\" y1=\"0\" x2=\"226\" y2=\"0\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"47.96\" stroke=\"#333333\" stroke-width=\"0.75\"/><line x1=\"-3\" y1=\"47.96\" x2=\"0\" y2=\"47.96\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"-4\" y=\"50.46\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">0</text><line x1=\"-3\" y1=\"31.97\" x2=\"0\" y2=\"31.97\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"-4\" y=\"34.47\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">30</text><line x1=\"-3\" y1=\"15.99\" x2=\"0\" y2=\"15.99\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"-4\" y=\"18.49\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">60</text><line x1=\"-3\" y1=\"0\" x2=\"0\" y2=\"0\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"2.83\" y=\"17.59\" width=\"11.33\" height=\"30.37\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"21.83\" y=\"14.39\" width=\"11.33\" height=\"33.57\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"40.83\" y=\"17.05\" width=\"11.33\" height=\"30.91\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"59.83\" y=\"13.86\" width=\"11.33\" height=\"34.1\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"78.83\" y=\"11.19\" width=\"11.33\" height=\"36.77\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"97.83\" y=\"10.12\" width=\"11.33\" height=\"37.84\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"116.83\" y=\"11.72\" width=\"11.33\" height=\"36.24\" fill=\"url(#hm-column-with-variance-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"135.83\" y=\"12.79\" width=\"11.33\" height=\"35.17\" fill=\"url(#hm-column-with-variance-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"154.83\" y=\"9.59\" width=\"11.33\" height=\"38.37\" fill=\"url(#hm-column-with-variance-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"173.83\" y=\"7.99\" width=\"11.33\" height=\"39.97\" fill=\"url(#hm-column-with-variance-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"192.83\" y=\"8.53\" width=\"11.33\" height=\"39.43\" fill=\"url(#hm-column-with-variance-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"211.83\" y=\"4.8\" width=\"11.33\" height=\"43.16\" fill=\"url(#hm-column-with-variance-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"0\" y1=\"47.96\" x2=\"226\" y2=\"47.96\" stroke=\"#333333\" stroke-width=\"0.75\"/><text x=\"8.5\" y=\"57.46\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Jan</text><text x=\"27.5\" y=\"57.46\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Feb</text><text x=\"46.5\" y=\"57.46\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Mar</text><text x=\"65.5\" y=\"57.46\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Apr</text><text x=\"84.5\" y=\"57.46\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">May</text><text x=\"103.5\" y=\"57.46\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Jun</text><text x=\"122.5\" y=\"57.46\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Jul</text><text x=\"141.5\" y=\"57.46\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Aug</text><text x=\"160.5\" y=\"57.46\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Sep</text><text x=\"179.5\" y=\"57.46\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Oct</text><text x=\"198.5\" y=\"57.46\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Nov</text><text x=\"217.5\" y=\"57.46\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Dec</text></g></g></svg>"
+    },
+    {
+      "id": "contribution-waterfall",
+      "kind": "chart",
+      "name": "Contribution bridge (baseline to actual)",
+      "family": "time-series-columns",
+      "status": "draft",
+      "purpose": "Bridges from the baseline total (outlined, in the baseline scenario's notation) through per-period impact-coloured variance steps to the compared total (solid) — \"how did we get from plan to actual\".",
+      "notation": {
+        "variance_colouring": {
+          "by": "business impact (good_direction)",
+          "desirable": "impact-desirable",
+          "undesirable": "impact-undesirable"
+        },
+        "minuend_scenario_fills": "FC-sourced steps hatched in the impact colour (UN 4.1)",
+        "totals": "baseline total outlined per its scenario; compared total solid",
+        "title_block": "required"
+      },
+      "geometry": {
+        "category_width_ratio": "absolute",
+        "connectors": "hairline at each closing level"
+      },
+      "data_contract": {
+        "dimension": {
+          "type": "time",
+          "granularities": [
+            "weekly",
+            "4-week",
+            "monthly",
+            "quarterly",
+            "annual"
+          ]
+        },
+        "series": {
+          "min": 2,
+          "scenarios_allowed": [
+            "AC",
+            "PY",
+            "PL",
+            "BU",
+            "FC"
+          ]
+        },
+        "derived": {
+          "value": "compare - baseline per period",
+          "compare": "first non-null among [AC, FC]",
+          "baseline": "PL default"
+        }
+      },
+      "anti_patterns": null,
+      "applies_rules": [
+        "variance-needs-baseline",
+        "scenario-notation"
+      ],
+      "basis": "interpretation",
+      "citations": [
+        "IBCS 2.0 UN 4.1 variance notation applied to bridge steps"
+      ],
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"260\" height=\"160\" viewBox=\"0 0 260 160\" font-family=\"'Barlow', sans-serif\"><desc>hatchmark v0.5.1 contribution-waterfall</desc><defs><pattern id=\"hm-contribution-waterfall-hatch-0\" patternUnits=\"userSpaceOnUse\" width=\"4\" height=\"4\" patternTransform=\"rotate(45)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"4\" stroke=\"#89B54A\" stroke-width=\"1.5\"/></pattern><pattern id=\"hm-contribution-waterfall-hatch-1\" patternUnits=\"userSpaceOnUse\" width=\"4\" height=\"4\" patternTransform=\"rotate(45)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"4\" stroke=\"#0066CC\" stroke-width=\"1.5\"/></pattern></defs><rect x=\"0\" y=\"0\" width=\"260\" height=\"160\" fill=\"#FFFFFF\"/><text x=\"13.86\" y=\"7.5\" font-size=\"7.5\" fill=\"#333333\"><tspan x=\"13.86\" dy=\"0\">Alpha Corporation</tspan><tspan x=\"13.86\" dy=\"10\"><tspan font-weight=\"600\">Net sales bridge </tspan>in mEUR</tspan><tspan x=\"13.86\" dy=\"10\">2026 PL to AC&amp;FC</tspan></text><text x=\"26\" y=\"43.5\" font-size=\"7.5\" fill=\"#333333\" text-anchor=\"end\">mEUR</text><g transform=\"translate(28,44.5)\"><line x1=\"0\" y1=\"103.5\" x2=\"226\" y2=\"103.5\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><line x1=\"0\" y1=\"77.63\" x2=\"226\" y2=\"77.63\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><line x1=\"0\" y1=\"51.75\" x2=\"226\" y2=\"51.75\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><line x1=\"0\" y1=\"25.87\" x2=\"226\" y2=\"25.87\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><line x1=\"0\" y1=\"0\" x2=\"226\" y2=\"0\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"103.5\" stroke=\"#333333\" stroke-width=\"0.75\"/><line x1=\"-3\" y1=\"103.5\" x2=\"0\" y2=\"103.5\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"-4\" y=\"106\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">759</text><line x1=\"-3\" y1=\"77.63\" x2=\"0\" y2=\"77.63\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"-4\" y=\"80.13\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">784</text><line x1=\"-3\" y1=\"51.75\" x2=\"0\" y2=\"51.75\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"-4\" y=\"54.25\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">809</text><line x1=\"-3\" y1=\"25.87\" x2=\"0\" y2=\"25.87\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"-4\" y=\"28.37\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">834</text><line x1=\"-3\" y1=\"0\" x2=\"0\" y2=\"0\" stroke=\"#333333\" stroke-width=\"0.5\"/><path d=\"M -4 98.5 l 8 -4\" stroke=\"#FFFFFF\" stroke-width=\"3.5\" fill=\"none\"/><path d=\"M -4 96.5 l 8 -4\" stroke=\"#333333\" stroke-width=\"0.6\" fill=\"none\"/><path d=\"M -4 100.5 l 8 -4\" stroke=\"#333333\" stroke-width=\"0.6\" fill=\"none\"/><rect x=\"2.38\" y=\"81.91\" width=\"9.52\" height=\"21.59\" fill=\"transparent\" stroke=\"#333333\" stroke-width=\"1.5\"/><path d=\"M 0.3809523809523814 98.5 l 13.523809523809524 -4\" stroke=\"#FFFFFF\" stroke-width=\"3.5\" fill=\"none\"/><path d=\"M 0.3809523809523814 96.5 l 13.523809523809524 -4\" stroke=\"#333333\" stroke-width=\"0.6\" fill=\"none\"/><path d=\"M 0.3809523809523814 100.5 l 13.523809523809524 -4\" stroke=\"#333333\" stroke-width=\"0.6\" fill=\"none\"/><line x1=\"11.9\" y1=\"81.91\" x2=\"28.19\" y2=\"81.91\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"18.67\" y=\"81.91\" width=\"9.52\" height=\"3.11\" fill=\"#E2001A\"/><line x1=\"28.19\" y1=\"85.02\" x2=\"44.48\" y2=\"85.02\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"34.95\" y=\"81.91\" width=\"9.52\" height=\"3.11\" fill=\"#89B54A\"/><line x1=\"44.48\" y1=\"81.91\" x2=\"60.76\" y2=\"81.91\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"51.24\" y=\"81.91\" width=\"9.52\" height=\"4.15\" fill=\"#E2001A\"/><line x1=\"60.76\" y1=\"86.06\" x2=\"77.05\" y2=\"86.06\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"67.52\" y=\"83.98\" width=\"9.52\" height=\"2.08\" fill=\"#89B54A\"/><line x1=\"77.05\" y1=\"83.98\" x2=\"93.33\" y2=\"83.98\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"83.81\" y=\"78.79\" width=\"9.52\" height=\"5.19\" fill=\"#89B54A\"/><line x1=\"93.33\" y1=\"78.79\" x2=\"109.62\" y2=\"78.79\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"100.1\" y=\"71.53\" width=\"9.52\" height=\"7.27\" fill=\"#89B54A\"/><line x1=\"109.62\" y1=\"71.53\" x2=\"125.9\" y2=\"71.53\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"116.38\" y=\"69.45\" width=\"9.52\" height=\"2.08\" fill=\"url(#hm-contribution-waterfall-hatch-0)\" stroke=\"#89B54A\" stroke-width=\"0.5\"/><line x1=\"125.9\" y1=\"69.45\" x2=\"142.19\" y2=\"69.45\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"132.67\" y=\"69.45\" width=\"9.52\" height=\"0.5\" fill=\"url(#hm-contribution-waterfall-hatch-1)\" stroke=\"#0066CC\" stroke-width=\"0.5\"/><line x1=\"142.19\" y1=\"69.45\" x2=\"158.48\" y2=\"69.45\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"148.95\" y=\"65.3\" width=\"9.52\" height=\"4.15\" fill=\"url(#hm-contribution-waterfall-hatch-0)\" stroke=\"#89B54A\" stroke-width=\"0.5\"/><line x1=\"158.48\" y1=\"65.3\" x2=\"174.76\" y2=\"65.3\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"165.24\" y=\"58.03\" width=\"9.52\" height=\"7.27\" fill=\"url(#hm-contribution-waterfall-hatch-0)\" stroke=\"#89B54A\" stroke-width=\"0.5\"/><line x1=\"174.76\" y1=\"58.03\" x2=\"191.05\" y2=\"58.03\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"181.52\" y=\"53.88\" width=\"9.52\" height=\"4.15\" fill=\"url(#hm-contribution-waterfall-hatch-0)\" stroke=\"#89B54A\" stroke-width=\"0.5\"/><line x1=\"191.05\" y1=\"53.88\" x2=\"207.33\" y2=\"53.88\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"197.81\" y=\"42.46\" width=\"9.52\" height=\"11.42\" fill=\"url(#hm-contribution-waterfall-hatch-0)\" stroke=\"#89B54A\" stroke-width=\"0.5\"/><line x1=\"207.33\" y1=\"42.46\" x2=\"223.62\" y2=\"42.46\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"214.1\" y=\"42.46\" width=\"9.52\" height=\"61.04\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><path d=\"M 212.09523809523807 98.5 l 13.523809523809524 -4\" stroke=\"#FFFFFF\" stroke-width=\"3.5\" fill=\"none\"/><path d=\"M 212.09523809523807 96.5 l 13.523809523809524 -4\" stroke=\"#333333\" stroke-width=\"0.6\" fill=\"none\"/><path d=\"M 212.09523809523807 100.5 l 13.523809523809524 -4\" stroke=\"#333333\" stroke-width=\"0.6\" fill=\"none\"/><line x1=\"0\" y1=\"103.5\" x2=\"226\" y2=\"103.5\" stroke=\"#333333\" stroke-width=\"0.75\"/><text x=\"7.14\" y=\"79.91\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">780</text><text x=\"23.43\" y=\"92.02\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">−3</text><text x=\"39.71\" y=\"79.91\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+3</text><text x=\"56\" y=\"93.06\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">−4</text><text x=\"72.29\" y=\"81.98\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+2</text><text x=\"88.57\" y=\"76.79\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+5</text><text x=\"104.86\" y=\"69.53\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+7</text><text x=\"121.14\" y=\"67.45\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+2</text><text x=\"137.43\" y=\"67.45\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">0</text><text x=\"153.71\" y=\"63.3\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+4</text><text x=\"170\" y=\"56.03\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+7</text><text x=\"186.29\" y=\"51.88\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+4</text><text x=\"202.57\" y=\"40.46\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+11</text><text x=\"218.86\" y=\"40.46\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">818</text><text x=\"7.14\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">PL</text><text x=\"23.43\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Jan</text><text x=\"39.71\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Feb</text><text x=\"56\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Mar</text><text x=\"72.29\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Apr</text><text x=\"88.57\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">May</text><text x=\"104.86\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Jun</text><text x=\"121.14\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Jul</text><text x=\"137.43\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Aug</text><text x=\"153.71\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Sep</text><text x=\"170\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Oct</text><text x=\"186.29\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Nov</text><text x=\"202.57\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Dec</text><text x=\"218.86\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">AC</text></g></svg>"
+    },
+    {
+      "id": "relative-variance-pins-bar",
+      "kind": "chart",
+      "name": "Relative variance pins (structure)",
+      "family": "structure-bars",
+      "status": "draft",
+      "purpose": "Percentage deviation per category as horizontal pins from a vertical zero line; pin heads carry the compared scenario's fill, stems the impact colour.",
+      "notation": {
+        "variance_colouring": {
+          "by": "business impact (good_direction)"
+        },
+        "measure_type": "relative (1/3 of row height)",
+        "title_block": "required (ΔPL%)"
+      },
+      "geometry": null,
+      "data_contract": {
+        "dimension": {
+          "type": "structure"
+        },
+        "series": {
+          "min": 2,
+          "scenarios_allowed": [
+            "AC",
+            "PY",
+            "PL",
+            "BU",
+            "FC"
+          ]
+        },
+        "derived": {
+          "value": "(compare - baseline) / baseline * 100",
+          "uninterpretable": "baseline missing, zero or negative → N/A"
+        }
+      },
+      "anti_patterns": null,
+      "applies_rules": [
+        "variance-needs-baseline"
+      ],
+      "basis": "standard",
+      "citations": [
+        "IBCS 2.0 UN 4.1 — pins for relative variances",
+        "IBCS 2.0 UN 3.1 — relative at 1/3 width"
+      ],
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"260\" height=\"160\" viewBox=\"0 0 260 160\" font-family=\"'Barlow', sans-serif\"><desc>hatchmark v0.5.1 relative-variance-pins-bar</desc><rect x=\"0\" y=\"0\" width=\"260\" height=\"160\" fill=\"#FFFFFF\"/><text x=\"0\" y=\"7.5\" font-size=\"7.5\" fill=\"#333333\"><tspan x=\"0\" dy=\"0\">Alpha Corporation</tspan><tspan x=\"0\" dy=\"10\"><tspan font-weight=\"600\">Net sales ΔPL%</tspan></tspan><tspan x=\"0\" dy=\"10\">2026 AC and PL</tspan></text><g transform=\"translate(38,36)\"><rect x=\"107\" y=\"9.85\" width=\"38.2\" height=\"1.11\" fill=\"#89B54A\"/><rect x=\"143.64\" y=\"8.84\" width=\"3.12\" height=\"3.12\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"63.34\" y=\"32.65\" width=\"43.66\" height=\"1.11\" fill=\"#E2001A\"/><rect x=\"61.78\" y=\"31.64\" width=\"3.12\" height=\"3.12\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"107\" y=\"55.45\" width=\"22.64\" height=\"1.11\" fill=\"#89B54A\"/><rect x=\"128.08\" y=\"54.44\" width=\"3.12\" height=\"3.12\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"107\" y=\"78.25\" width=\"38.58\" height=\"1.11\" fill=\"#89B54A\"/><rect x=\"144.02\" y=\"77.24\" width=\"3.12\" height=\"3.12\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"17.12\" y=\"101.05\" width=\"89.88\" height=\"1.11\" fill=\"#E2001A\"/><rect x=\"15.56\" y=\"100.04\" width=\"3.12\" height=\"3.12\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"106.1\" y1=\"0\" x2=\"106.1\" y2=\"112\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"107.9\" y1=\"0\" x2=\"107.9\" y2=\"112\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"149.2\" y=\"12.4\" font-size=\"6\" fill=\"#333333\" text-anchor=\"start\">+8%</text><text x=\"59.34\" y=\"35.2\" font-size=\"6\" fill=\"#333333\" text-anchor=\"end\">−9%</text><text x=\"133.64\" y=\"58\" font-size=\"6\" fill=\"#333333\" text-anchor=\"start\">+4%</text><text x=\"149.58\" y=\"80.8\" font-size=\"6\" fill=\"#333333\" text-anchor=\"start\">+8%</text><text x=\"13.12\" y=\"103.6\" font-size=\"6\" fill=\"#333333\" text-anchor=\"end\">−18%</text><text x=\"-4\" y=\"12.57\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">North</text><text x=\"-4\" y=\"35.37\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">South</text><text x=\"-4\" y=\"58.17\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">East</text><text x=\"-4\" y=\"80.97\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">West</text><text x=\"-4\" y=\"103.77\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">Central</text></g></svg>"
+    },
+    {
+      "id": "relative-variance-pins",
+      "kind": "chart",
+      "name": "Relative variance pins (time series)",
+      "family": "time-series-columns",
+      "status": "draft",
+      "purpose": "The percentage deviation of a compared scenario from a baseline per period, drawn as pins (thin stems with a head) from a zero line, coloured by business impact.",
+      "notation": {
+        "variance_colouring": {
+          "by": "business impact (good_direction of the measure), not raw sign",
+          "desirable": "impact-desirable",
+          "undesirable": "impact-undesirable",
+          "neutral": "impact-neutral (uninterpretable or zero variance)"
+        },
+        "measure_type": "relative",
+        "data_labels": {
+          "format": "signed percentage (\"+4%\", \"-2%\")",
+          "placement": "beyond the pin head"
+        },
+        "title_block": "required (e.g. \"ΔPL%\")"
+      },
+      "geometry": {
+        "category_width_ratio": "relative",
+        "pins": "thin vertical stem from the zero line to the value, with a compact head",
+        "pin_heads": {
+          "shape": "compact square",
+          "scenario_fill": "The head carries the scenario notation of the compared value (the minuend): solid dark for AC, hatched for FC — per UN 4.1's relative-variance subsection (pp.54–55).\n"
+        },
+        "zero_line": "rendered across the plot at value 0"
+      },
+      "data_contract": {
+        "dimension": {
+          "type": "time",
+          "granularities": [
+            "weekly",
+            "4-week",
+            "monthly",
+            "quarterly",
+            "annual"
+          ]
+        },
+        "series": {
+          "min": 2,
+          "scenarios_allowed": [
+            "AC",
+            "PY",
+            "PL",
+            "BU",
+            "FC"
+          ],
+          "notes": "One baseline scenario plus at least one compared scenario."
+        },
+        "derived": {
+          "value": "(compare - baseline) / baseline * 100",
+          "compare": "first non-null per period among [AC, FC]",
+          "baseline": "PL (default; BU or PY where PL absent)",
+          "uninterpretable": "Baseline missing, zero or negative, or compare value missing. Per UN 4.1 the standard's treatment is to display \"N/A\" (its example is a positive value against a negative reference); hatchmark draws no stem, places the head at the zero line, and labels \"N/A\" when the compare value exists, and skips the period entirely when it does not.\n"
+        }
+      },
+      "anti_patterns": [
+        "Rendering relative variances at full (absolute) column width.",
+        "Colouring pins by scenario instead of by impact."
+      ],
+      "applies_rules": [
+        "variance-needs-baseline"
+      ],
+      "basis": "standard",
+      "citations": [
+        "IBCS 2.0 UN 4.1 — pins for relative variances, impact colouring; audited 2026-08-29",
+        "IBCS 2.0 UN 3.1 — relative measures at 1/3 category width; audited 2026-08-29 — donor's 'ISO §4.5.1' citation unverifiable, recited to UN 3.1"
+      ],
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"260\" height=\"160\" viewBox=\"0 0 260 160\" font-family=\"'Barlow', sans-serif\"><desc>hatchmark v0.5.1 relative-variance-pins</desc><defs><pattern id=\"hm-relative-variance-pins-hatch-0\" patternUnits=\"userSpaceOnUse\" width=\"4\" height=\"4\" patternTransform=\"rotate(45)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"4\" stroke=\"#333333\" stroke-width=\"1.5\"/></pattern></defs><rect x=\"0\" y=\"0\" width=\"260\" height=\"160\" fill=\"#FFFFFF\"/><text x=\"0\" y=\"7.5\" font-size=\"7.5\" fill=\"#333333\"><tspan x=\"0\" dy=\"0\">Alpha Corporation</tspan><tspan x=\"0\" dy=\"10\"><tspan font-weight=\"600\">Net sales ΔPL%</tspan></tspan><tspan x=\"0\" dy=\"10\">2026 AC&amp;FC and PL</tspan></text><g transform=\"translate(2,36)\"><rect x=\"9.07\" y=\"56\" width=\"1.02\" height=\"14.69\" fill=\"#E2001A\"/><rect x=\"8.08\" y=\"69.19\" width=\"3\" height=\"3\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"30.24\" y=\"41.31\" width=\"1.02\" height=\"14.69\" fill=\"#89B54A\"/><rect x=\"29.25\" y=\"39.81\" width=\"3\" height=\"3\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"51.41\" y=\"56\" width=\"1.02\" height=\"18.96\" fill=\"#E2001A\"/><rect x=\"50.42\" y=\"73.46\" width=\"3\" height=\"3\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"72.57\" y=\"46.52\" width=\"1.02\" height=\"9.48\" fill=\"#89B54A\"/><rect x=\"71.58\" y=\"45.02\" width=\"3\" height=\"3\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"93.74\" y=\"33.04\" width=\"1.02\" height=\"22.96\" fill=\"#89B54A\"/><rect x=\"92.75\" y=\"31.54\" width=\"3\" height=\"3\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"114.91\" y=\"23.86\" width=\"1.02\" height=\"32.14\" fill=\"#89B54A\"/><rect x=\"113.92\" y=\"22.36\" width=\"3\" height=\"3\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"136.07\" y=\"47.09\" width=\"1.02\" height=\"8.91\" fill=\"#89B54A\"/><rect x=\"135.08\" y=\"45.59\" width=\"3\" height=\"3\" fill=\"url(#hm-relative-variance-pins-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"156.25\" y=\"54.5\" width=\"3\" height=\"3\" fill=\"url(#hm-relative-variance-pins-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"178.41\" y=\"38.71\" width=\"1.02\" height=\"17.29\" fill=\"#89B54A\"/><rect x=\"177.42\" y=\"37.21\" width=\"3\" height=\"3\" fill=\"url(#hm-relative-variance-pins-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"199.57\" y=\"25.75\" width=\"1.02\" height=\"30.25\" fill=\"#89B54A\"/><rect x=\"198.58\" y=\"24.25\" width=\"3\" height=\"3\" fill=\"url(#hm-relative-variance-pins-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"220.74\" y=\"39.21\" width=\"1.02\" height=\"16.79\" fill=\"#89B54A\"/><rect x=\"219.75\" y=\"37.71\" width=\"3\" height=\"3\" fill=\"url(#hm-relative-variance-pins-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"241.91\" y=\"9.82\" width=\"1.02\" height=\"46.18\" fill=\"#89B54A\"/><rect x=\"240.92\" y=\"8.32\" width=\"3\" height=\"3\" fill=\"url(#hm-relative-variance-pins-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"0\" y1=\"55.1\" x2=\"252\" y2=\"55.1\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"0\" y1=\"56.9\" x2=\"252\" y2=\"56.9\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"9.58\" y=\"78.51\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">−5%</text><text x=\"30.75\" y=\"37.81\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+5%</text><text x=\"51.92\" y=\"82.78\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">−6%</text><text x=\"73.08\" y=\"43.02\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+3%</text><text x=\"94.25\" y=\"29.54\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+8%</text><text x=\"115.42\" y=\"20.36\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+11%</text><text x=\"136.58\" y=\"43.59\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+3%</text><text x=\"157.75\" y=\"52.5\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">0%</text><text x=\"178.92\" y=\"35.21\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+6%</text><text x=\"200.08\" y=\"22.25\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+10%</text><text x=\"221.25\" y=\"35.71\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+6%</text><text x=\"242.42\" y=\"6.32\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+16%</text><text x=\"9.58\" y=\"121.5\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Jan</text><text x=\"30.75\" y=\"121.5\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Feb</text><text x=\"51.92\" y=\"121.5\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Mar</text><text x=\"73.08\" y=\"121.5\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Apr</text><text x=\"94.25\" y=\"121.5\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">May</text><text x=\"115.42\" y=\"121.5\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Jun</text><text x=\"136.58\" y=\"121.5\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Jul</text><text x=\"157.75\" y=\"121.5\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Aug</text><text x=\"178.92\" y=\"121.5\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Sep</text><text x=\"200.08\" y=\"121.5\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Oct</text><text x=\"221.25\" y=\"121.5\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Nov</text><text x=\"242.42\" y=\"121.5\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Dec</text></g></svg>"
+    },
+    {
+      "id": "small-multiples-column",
+      "kind": "chart",
+      "name": "Small multiples (columns)",
+      "family": "small-multiples",
+      "status": "draft",
+      "purpose": "One column panel per entity (labelled series), every panel on the identical value scale so magnitudes compare truthfully across the grid (CH 4.1 / CO 5.1). Up to three panels per row; larger sets grow near-square.",
+      "notation": {
+        "shared_scale": "required across all panels",
+        "panel_titles": "entity labels",
+        "title_block": "required"
+      },
+      "geometry": null,
+      "data_contract": {
+        "dimension": {
+          "type": "time",
+          "granularities": [
+            "weekly",
+            "4-week",
+            "monthly",
+            "quarterly",
+            "annual"
+          ]
+        },
+        "series": {
+          "min": 2,
+          "scenarios_allowed": [
+            "AC",
+            "PY",
+            "PL",
+            "BU",
+            "FC"
+          ],
+          "notes": "One series per entity, distinguished by label."
+        }
+      },
+      "anti_patterns": [
+        "Rescaling an outlier panel — enlarge the chart, never change its scale (CH 4.2)."
+      ],
+      "applies_rules": [
+        "small-multiples-panels",
+        "zero-baseline"
+      ],
+      "basis": "standard",
+      "citations": [
+        "IBCS 2.0 CO 5.1 / CH 4.1 / CH 4.2"
+      ],
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"260\" height=\"160\" viewBox=\"0 0 260 160\" font-family=\"'Barlow', sans-serif\"><desc>hatchmark v0.5.1 small-multiples-column</desc><rect x=\"0\" y=\"0\" width=\"260\" height=\"160\" fill=\"#FFFFFF\"/><text x=\"17.240000000000002\" y=\"7.5\" font-size=\"7.5\" fill=\"#333333\"><tspan x=\"17.240000000000002\" dy=\"0\">Alpha Corporation</tspan><tspan x=\"17.240000000000002\" dy=\"10\"><tspan font-weight=\"600\">Net sales </tspan>in mEUR</tspan><tspan x=\"17.240000000000002\" dy=\"10\">2026 AC by region</tspan></text><text x=\"26\" y=\"43.5\" font-size=\"7.5\" fill=\"#333333\" text-anchor=\"end\">mEUR</text><g transform=\"translate(28,44.5)\"><g transform=\"translate(0,0)\"><text x=\"0\" y=\"7\" font-size=\"6\" font-weight=\"600\" fill=\"#333333\">North</text><rect x=\"2.69\" y=\"21.56\" width=\"10.78\" height=\"24.19\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"20.86\" y=\"18.1\" width=\"10.78\" height=\"27.65\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"39.03\" y=\"20.41\" width=\"10.78\" height=\"25.34\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"57.19\" y=\"15.8\" width=\"10.78\" height=\"29.95\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"75.36\" y=\"14.64\" width=\"10.78\" height=\"31.11\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"93.53\" y=\"12.34\" width=\"10.78\" height=\"33.41\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"0\" y1=\"45.75\" x2=\"107\" y2=\"45.75\" stroke=\"#333333\" stroke-width=\"0.75\"/><text x=\"-3\" y=\"47.75\" font-size=\"5.5\" fill=\"#333333\" text-anchor=\"end\">0</text><text x=\"-3\" y=\"13\" font-size=\"5.5\" fill=\"#333333\" text-anchor=\"end\">32</text><text x=\"8.08\" y=\"52.75\" font-size=\"5.5\" fill=\"#333333\" text-anchor=\"middle\">Jan</text><text x=\"98.92\" y=\"52.75\" font-size=\"5.5\" fill=\"#333333\" text-anchor=\"middle\">Jun</text></g><g transform=\"translate(119,0)\"><text x=\"0\" y=\"7\" font-size=\"6\" font-weight=\"600\" fill=\"#333333\">South</text><rect x=\"2.69\" y=\"29.62\" width=\"10.78\" height=\"16.13\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"20.86\" y=\"30.77\" width=\"10.78\" height=\"14.98\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"39.03\" y=\"28.47\" width=\"10.78\" height=\"17.28\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"57.19\" y=\"29.62\" width=\"10.78\" height=\"16.13\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"75.36\" y=\"27.32\" width=\"10.78\" height=\"18.43\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"93.53\" y=\"28.47\" width=\"10.78\" height=\"17.28\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"0\" y1=\"45.75\" x2=\"107\" y2=\"45.75\" stroke=\"#333333\" stroke-width=\"0.75\"/><text x=\"8.08\" y=\"52.75\" font-size=\"5.5\" fill=\"#333333\" text-anchor=\"middle\">Jan</text><text x=\"98.92\" y=\"52.75\" font-size=\"5.5\" fill=\"#333333\" text-anchor=\"middle\">Jun</text></g><g transform=\"translate(0,57.75)\"><text x=\"0\" y=\"7\" font-size=\"6\" font-weight=\"600\" fill=\"#333333\">East</text><rect x=\"2.69\" y=\"35.38\" width=\"10.78\" height=\"10.37\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"20.86\" y=\"34.23\" width=\"10.78\" height=\"11.52\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"39.03\" y=\"31.93\" width=\"10.78\" height=\"13.82\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"57.19\" y=\"33.08\" width=\"10.78\" height=\"12.67\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"75.36\" y=\"30.77\" width=\"10.78\" height=\"14.98\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"93.53\" y=\"29.62\" width=\"10.78\" height=\"16.13\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"0\" y1=\"45.75\" x2=\"107\" y2=\"45.75\" stroke=\"#333333\" stroke-width=\"0.75\"/><text x=\"-3\" y=\"47.75\" font-size=\"5.5\" fill=\"#333333\" text-anchor=\"end\">0</text><text x=\"-3\" y=\"13\" font-size=\"5.5\" fill=\"#333333\" text-anchor=\"end\">32</text><text x=\"8.08\" y=\"52.75\" font-size=\"5.5\" fill=\"#333333\" text-anchor=\"middle\">Jan</text><text x=\"98.92\" y=\"52.75\" font-size=\"5.5\" fill=\"#333333\" text-anchor=\"middle\">Jun</text></g><g transform=\"translate(119,57.75)\"><text x=\"0\" y=\"7\" font-size=\"6\" font-weight=\"600\" fill=\"#333333\">West</text><rect x=\"2.69\" y=\"30.77\" width=\"10.78\" height=\"14.98\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"20.86\" y=\"27.32\" width=\"10.78\" height=\"18.43\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"39.03\" y=\"35.38\" width=\"10.78\" height=\"10.37\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"57.19\" y=\"25.01\" width=\"10.78\" height=\"20.74\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"75.36\" y=\"30.77\" width=\"10.78\" height=\"14.98\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"93.53\" y=\"30.77\" width=\"10.78\" height=\"14.98\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"0\" y1=\"45.75\" x2=\"107\" y2=\"45.75\" stroke=\"#333333\" stroke-width=\"0.75\"/><text x=\"8.08\" y=\"52.75\" font-size=\"5.5\" fill=\"#333333\" text-anchor=\"middle\">Jan</text><text x=\"98.92\" y=\"52.75\" font-size=\"5.5\" fill=\"#333333\" text-anchor=\"middle\">Jun</text></g></g></svg>"
+    },
+    {
+      "id": "waterfall-column",
+      "kind": "chart",
+      "name": "Waterfall (cumulative contributions)",
+      "family": "time-series-columns",
+      "status": "draft",
+      "purpose": "Period contributions accumulated as floating columns with hairline connectors, closing on a total column, so the reader sees both each step and where the steps lead. Forecast-sourced steps render hatched.",
+      "notation": {
+        "scenario_fills": "required (deltas and totals; FC hatched)",
+        "data_labels": {
+          "format": "signed for deltas",
+          "plain for totals": null,
+          "optional": true
+        },
+        "title_block": "required"
+      },
+      "geometry": {
+        "category_width_ratio": "absolute",
+        "connectors": "hairline at each closing level between adjacent columns",
+        "end_total": "appended by default, full column from zero, labelled Σ"
+      },
+      "data_contract": {
+        "dimension": {
+          "type": "time",
+          "granularities": [
+            "weekly",
+            "4-week",
+            "monthly",
+            "quarterly",
+            "annual"
+          ]
+        },
+        "series": {
+          "min": 1,
+          "scenarios_allowed": [
+            "AC",
+            "PY",
+            "PL",
+            "BU",
+            "FC"
+          ],
+          "notes": "Values are per-period deltas; compare order merges AC then FC."
+        }
+      },
+      "anti_patterns": [
+        "Colouring deltas green/red by sign — a waterfall of a measure is scenario notation, not variance notation."
+      ],
+      "applies_rules": [
+        "scenario-notation"
+      ],
+      "basis": "interpretation",
+      "citations": [
+        "IBCS 2.0 EX 1.1 waterfall guidance; scenario fills per UN 3.2"
+      ],
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"260\" height=\"160\" viewBox=\"0 0 260 160\" font-family=\"'Barlow', sans-serif\"><desc>hatchmark v0.5.1 waterfall-column</desc><defs><pattern id=\"hm-waterfall-column-hatch-0\" patternUnits=\"userSpaceOnUse\" width=\"4\" height=\"4\" patternTransform=\"rotate(45)\"><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"4\" stroke=\"#333333\" stroke-width=\"1.5\"/></pattern></defs><rect x=\"0\" y=\"0\" width=\"260\" height=\"160\" fill=\"#FFFFFF\"/><text x=\"13.86\" y=\"7.5\" font-size=\"7.5\" fill=\"#333333\"><tspan x=\"13.86\" dy=\"0\">Alpha Corporation</tspan><tspan x=\"13.86\" dy=\"10\"><tspan font-weight=\"600\">Net sales build </tspan>in mEUR</tspan><tspan x=\"13.86\" dy=\"10\">2026 AC&amp;FC</tspan></text><text x=\"26\" y=\"43.5\" font-size=\"7.5\" fill=\"#333333\" text-anchor=\"end\">mEUR</text><g transform=\"translate(28,44.5)\"><line x1=\"0\" y1=\"103.5\" x2=\"226\" y2=\"103.5\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><line x1=\"0\" y1=\"77.63\" x2=\"226\" y2=\"77.63\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><line x1=\"0\" y1=\"51.75\" x2=\"226\" y2=\"51.75\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><line x1=\"0\" y1=\"25.88\" x2=\"226\" y2=\"25.88\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><line x1=\"0\" y1=\"0\" x2=\"226\" y2=\"0\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><line x1=\"0\" y1=\"0\" x2=\"0\" y2=\"103.5\" stroke=\"#333333\" stroke-width=\"0.75\"/><line x1=\"-3\" y1=\"103.5\" x2=\"0\" y2=\"103.5\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"-4\" y=\"106\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">0</text><line x1=\"-3\" y1=\"77.63\" x2=\"0\" y2=\"77.63\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"-4\" y=\"80.13\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">215</text><line x1=\"-3\" y1=\"51.75\" x2=\"0\" y2=\"51.75\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"-4\" y=\"54.25\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">429</text><line x1=\"-3\" y1=\"25.88\" x2=\"0\" y2=\"25.88\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"-4\" y=\"28.38\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"end\">644</text><line x1=\"-3\" y1=\"0\" x2=\"0\" y2=\"0\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"2.59\" y=\"96.63\" width=\"10.36\" height=\"6.87\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"12.95\" y1=\"96.63\" x2=\"30.49\" y2=\"96.63\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"20.13\" y=\"89.04\" width=\"10.36\" height=\"7.59\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"30.49\" y1=\"89.04\" x2=\"48.03\" y2=\"89.04\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"37.67\" y=\"82.05\" width=\"10.36\" height=\"6.99\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"48.03\" y1=\"82.05\" x2=\"65.56\" y2=\"82.05\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"55.21\" y=\"74.34\" width=\"10.36\" height=\"7.71\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"65.56\" y1=\"74.34\" x2=\"83.1\" y2=\"74.34\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"72.74\" y=\"66.02\" width=\"10.36\" height=\"8.31\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"83.1\" y1=\"66.02\" x2=\"100.64\" y2=\"66.02\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"90.28\" y=\"57.47\" width=\"10.36\" height=\"8.56\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"100.64\" y1=\"57.47\" x2=\"118.18\" y2=\"57.47\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"107.82\" y=\"49.27\" width=\"10.36\" height=\"8.19\" fill=\"url(#hm-waterfall-column-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"118.18\" y1=\"49.27\" x2=\"135.72\" y2=\"49.27\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"125.36\" y=\"41.32\" width=\"10.36\" height=\"7.95\" fill=\"url(#hm-waterfall-column-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"135.72\" y1=\"41.32\" x2=\"153.26\" y2=\"41.32\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"142.9\" y=\"32.64\" width=\"10.36\" height=\"8.68\" fill=\"url(#hm-waterfall-column-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"153.26\" y1=\"32.64\" x2=\"170.79\" y2=\"32.64\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"160.44\" y=\"23.61\" width=\"10.36\" height=\"9.04\" fill=\"url(#hm-waterfall-column-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"170.79\" y1=\"23.61\" x2=\"188.33\" y2=\"23.61\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"177.97\" y=\"14.69\" width=\"10.36\" height=\"8.92\" fill=\"url(#hm-waterfall-column-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"188.33\" y1=\"14.69\" x2=\"205.87\" y2=\"14.69\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"195.51\" y=\"4.93\" width=\"10.36\" height=\"9.76\" fill=\"url(#hm-waterfall-column-hatch-0)\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"205.87\" y1=\"4.93\" x2=\"223.41\" y2=\"4.93\" stroke=\"#333333\" stroke-width=\"0.5\"/><rect x=\"213.05\" y=\"4.93\" width=\"10.36\" height=\"98.57\" fill=\"#333333\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"0\" y1=\"103.5\" x2=\"226\" y2=\"103.5\" stroke=\"#333333\" stroke-width=\"0.75\"/><text x=\"7.77\" y=\"94.63\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+57</text><text x=\"25.31\" y=\"87.04\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+63</text><text x=\"42.85\" y=\"80.05\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+58</text><text x=\"60.38\" y=\"72.34\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+64</text><text x=\"77.92\" y=\"64.02\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+69</text><text x=\"95.46\" y=\"55.47\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+71</text><text x=\"113\" y=\"47.27\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+68</text><text x=\"130.54\" y=\"39.32\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+66</text><text x=\"148.08\" y=\"30.64\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+72</text><text x=\"165.62\" y=\"21.61\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+75</text><text x=\"183.15\" y=\"12.69\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+74</text><text x=\"200.69\" y=\"2.93\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">+81</text><text x=\"218.23\" y=\"2.93\" font-size=\"6\" fill=\"#333333\" text-anchor=\"middle\">818</text><text x=\"7.77\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Jan</text><text x=\"25.31\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Feb</text><text x=\"42.85\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Mar</text><text x=\"60.38\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Apr</text><text x=\"77.92\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">May</text><text x=\"95.46\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Jun</text><text x=\"113\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Jul</text><text x=\"130.54\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Aug</text><text x=\"148.08\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Sep</text><text x=\"165.62\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Oct</text><text x=\"183.15\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Nov</text><text x=\"200.69\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Dec</text><text x=\"218.23\" y=\"113\" font-size=\"6.5\" fill=\"#333333\" text-anchor=\"middle\">Σ</text></g></svg>"
+    }
+  ],
+  "tables": [
+    {
+      "id": "cross-table",
+      "kind": "table",
+      "name": "Cross table",
+      "family": "tables",
+      "status": "draft",
+      "purpose": "Structure-by-structure analysis: one structure dimension in the columns (e.g. products), another in the rows (e.g. regions), for a single scenario. Bold totals row and totals column close both dimensions, meeting in a grand total corner.",
+      "notation": {
+        "number_alignment": "right, shared scale chosen from body values (never totals)"
+      },
+      "geometry": null,
+      "data_contract": null,
+      "anti_patterns": null,
+      "applies_rules": [],
+      "basis": "standard",
+      "citations": [
+        "IBCS 2.0 EX 1.2 — cross table type — structure columns with structure rows (Fig. EX 1.2-24); audited 2026-08-29",
+        "IBCS 2.0 EX 1.2 totals rows/columns — totals placement and bold design (Figs. EX 1.2-10, EX 1.2-19)"
+      ],
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"260\" height=\"160\" viewBox=\"0 0 260 160\" font-family=\"'Barlow', sans-serif\"><desc>hatchmark v0.5.1 cross-table</desc><rect x=\"0\" y=\"0\" width=\"260\" height=\"160\" fill=\"#FFFFFF\"/><text x=\"0\" y=\"7.5\" font-size=\"7.5\" fill=\"#333333\"><tspan x=\"0\" dy=\"0\">Alpha Corporation</tspan><tspan x=\"0\" dy=\"10\"><tspan font-weight=\"600\">Net sales </tspan>in mEUR</tspan><tspan x=\"0\" dy=\"10\">2026 AC</tspan></text><text x=\"254\" y=\"43.5\" font-size=\"7.5\" fill=\"#333333\" text-anchor=\"end\">mEUR</text><g transform=\"translate(2,36)\"><text x=\"67.72\" y=\"9\" font-size=\"7\" font-weight=\"600\" fill=\"#333333\" text-anchor=\"end\">Espresso</text><text x=\"109.44\" y=\"9\" font-size=\"7\" font-weight=\"600\" fill=\"#333333\" text-anchor=\"end\">Grinders</text><text x=\"151.16\" y=\"9\" font-size=\"7\" font-weight=\"600\" fill=\"#333333\" text-anchor=\"end\">Filter</text><text x=\"192.88\" y=\"9\" font-size=\"7\" font-weight=\"600\" fill=\"#333333\" text-anchor=\"end\">Parts</text><text x=\"237.6\" y=\"9\" font-size=\"7\" font-weight=\"600\" fill=\"#333333\" text-anchor=\"end\">Σ</text><line x1=\"0\" y1=\"12\" x2=\"252\" y2=\"12\" stroke=\"#333333\" stroke-width=\"0.75\"/><text x=\"0\" y=\"20\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\">North</text><text x=\"67.72\" y=\"20\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">38</text><text x=\"109.44\" y=\"20\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">21</text><text x=\"151.16\" y=\"20\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">14</text><text x=\"192.88\" y=\"20\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">13</text><text x=\"237.6\" y=\"20\" font-size=\"6.5\" font-weight=\"700\" fill=\"#333333\" text-anchor=\"end\">86</text><line x1=\"0\" y1=\"23\" x2=\"252\" y2=\"23\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><text x=\"0\" y=\"31\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\">South</text><text x=\"67.72\" y=\"31\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">26</text><text x=\"109.44\" y=\"31\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">15</text><text x=\"151.16\" y=\"31\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">12</text><text x=\"192.88\" y=\"31\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">11</text><text x=\"237.6\" y=\"31\" font-size=\"6.5\" font-weight=\"700\" fill=\"#333333\" text-anchor=\"end\">64</text><line x1=\"0\" y1=\"34\" x2=\"252\" y2=\"34\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><text x=\"0\" y=\"42\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\">East</text><text x=\"67.72\" y=\"42\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">18</text><text x=\"109.44\" y=\"42\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">12</text><text x=\"151.16\" y=\"42\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">9</text><text x=\"192.88\" y=\"42\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">8</text><text x=\"237.6\" y=\"42\" font-size=\"6.5\" font-weight=\"700\" fill=\"#333333\" text-anchor=\"end\">47</text><line x1=\"0\" y1=\"45\" x2=\"252\" y2=\"45\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><text x=\"0\" y=\"53\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\">West</text><text x=\"67.72\" y=\"53\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">31</text><text x=\"109.44\" y=\"53\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">17</text><text x=\"151.16\" y=\"53\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">12</text><text x=\"192.88\" y=\"53\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">11</text><text x=\"237.6\" y=\"53\" font-size=\"6.5\" font-weight=\"700\" fill=\"#333333\" text-anchor=\"end\">71</text><line x1=\"0\" y1=\"56\" x2=\"252\" y2=\"56\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"0\" y=\"64\" font-size=\"6.5\" font-weight=\"700\" fill=\"#333333\">Σ</text><text x=\"67.72\" y=\"64\" font-size=\"6.5\" font-weight=\"700\" fill=\"#333333\" text-anchor=\"end\">113</text><text x=\"109.44\" y=\"64\" font-size=\"6.5\" font-weight=\"700\" fill=\"#333333\" text-anchor=\"end\">65</text><text x=\"151.16\" y=\"64\" font-size=\"6.5\" font-weight=\"700\" fill=\"#333333\" text-anchor=\"end\">47</text><text x=\"192.88\" y=\"64\" font-size=\"6.5\" font-weight=\"700\" fill=\"#333333\" text-anchor=\"end\">43</text><text x=\"237.6\" y=\"64\" font-size=\"6.5\" font-weight=\"700\" fill=\"#333333\" text-anchor=\"end\">268</text><line x1=\"0\" y1=\"68\" x2=\"252\" y2=\"68\" stroke=\"#333333\" stroke-width=\"0.75\"/></g></svg>"
+    },
+    {
+      "id": "time-series-table",
+      "kind": "table",
+      "name": "Time series table",
+      "family": "tables",
+      "status": "draft",
+      "purpose": "Time series analysis as a table: time columns in temporal order, one row per structure category (or per scenario), a bold totals row below structure rows, and a bold Σ totals column at the right. The non-variance sibling of the variance table.",
+      "notation": {
+        "number_alignment": "right, shared scale chosen from body values (never totals)",
+        "scenario_identity": "fill-treatment chips on scenario rows (UN 3.2)"
+      },
+      "geometry": null,
+      "data_contract": null,
+      "anti_patterns": null,
+      "applies_rules": [],
+      "basis": "standard",
+      "citations": [
+        "IBCS 2.0 EX 1.2 — time series table type (Fig. EX 1.2-22); time columns temporal order; audited 2026-08-29",
+        "IBCS 2.0 EX 1.2 totals rows/columns — totals below the group / right of the group, bold, separated (Figs. EX 1.2-10, EX 1.2-19)",
+        "IBCS 2.0 UN 2.3 — unify time periods; temporal order left to right"
+      ],
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"260\" height=\"160\" viewBox=\"0 0 260 160\" font-family=\"'Barlow', sans-serif\"><desc>hatchmark v0.5.1 time-series-table</desc><rect x=\"0\" y=\"0\" width=\"260\" height=\"160\" fill=\"#FFFFFF\"/><text x=\"0\" y=\"7.5\" font-size=\"7.5\" fill=\"#333333\"><tspan x=\"0\" dy=\"0\">Alpha Corporation</tspan><tspan x=\"0\" dy=\"10\"><tspan font-weight=\"600\">Net sales </tspan>in mEUR</tspan><tspan x=\"0\" dy=\"10\">2026 AC</tspan></text><text x=\"254\" y=\"43.5\" font-size=\"7.5\" fill=\"#333333\" text-anchor=\"end\">mEUR</text><g transform=\"translate(2,36)\"><text x=\"46.02\" y=\"9\" font-size=\"7\" font-weight=\"600\" fill=\"#333333\" text-anchor=\"end\">Jan</text><text x=\"66.04\" y=\"9\" font-size=\"7\" font-weight=\"600\" fill=\"#333333\" text-anchor=\"end\">Feb</text><text x=\"86.06\" y=\"9\" font-size=\"7\" font-weight=\"600\" fill=\"#333333\" text-anchor=\"end\">Mar</text><text x=\"106.08\" y=\"9\" font-size=\"7\" font-weight=\"600\" fill=\"#333333\" text-anchor=\"end\">Apr</text><text x=\"126.1\" y=\"9\" font-size=\"7\" font-weight=\"600\" fill=\"#333333\" text-anchor=\"end\">May</text><text x=\"146.12\" y=\"9\" font-size=\"7\" font-weight=\"600\" fill=\"#333333\" text-anchor=\"end\">Jun</text><text x=\"169.14\" y=\"9\" font-size=\"7\" font-weight=\"600\" fill=\"#333333\" text-anchor=\"end\">Σ</text><line x1=\"0\" y1=\"12\" x2=\"252\" y2=\"12\" stroke=\"#333333\" stroke-width=\"0.75\"/><text x=\"0\" y=\"20\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\">North</text><text x=\"46.02\" y=\"20\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">21</text><text x=\"66.04\" y=\"20\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">24</text><text x=\"86.06\" y=\"20\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">22</text><text x=\"106.08\" y=\"20\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">26</text><text x=\"126.1\" y=\"20\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">27</text><text x=\"146.12\" y=\"20\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">29</text><text x=\"169.14\" y=\"20\" font-size=\"6.5\" font-weight=\"700\" fill=\"#333333\" text-anchor=\"end\">149</text><line x1=\"0\" y1=\"23\" x2=\"252\" y2=\"23\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><text x=\"0\" y=\"31\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\">South</text><text x=\"46.02\" y=\"31\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">14</text><text x=\"66.04\" y=\"31\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">13</text><text x=\"86.06\" y=\"31\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">15</text><text x=\"106.08\" y=\"31\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">14</text><text x=\"126.1\" y=\"31\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">16</text><text x=\"146.12\" y=\"31\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">15</text><text x=\"169.14\" y=\"31\" font-size=\"6.5\" font-weight=\"700\" fill=\"#333333\" text-anchor=\"end\">87</text><line x1=\"0\" y1=\"34\" x2=\"252\" y2=\"34\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><text x=\"0\" y=\"42\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\">East</text><text x=\"46.02\" y=\"42\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">9</text><text x=\"66.04\" y=\"42\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">10</text><text x=\"86.06\" y=\"42\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">12</text><text x=\"106.08\" y=\"42\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">11</text><text x=\"126.1\" y=\"42\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">13</text><text x=\"146.12\" y=\"42\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">14</text><text x=\"169.14\" y=\"42\" font-size=\"6.5\" font-weight=\"700\" fill=\"#333333\" text-anchor=\"end\">69</text><line x1=\"0\" y1=\"45\" x2=\"252\" y2=\"45\" stroke=\"#E5E7EB\" stroke-width=\"0.25\"/><text x=\"0\" y=\"53\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\">West</text><text x=\"46.02\" y=\"53\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">13</text><text x=\"66.04\" y=\"53\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">16</text><text x=\"86.06\" y=\"53\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">9</text><text x=\"106.08\" y=\"53\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">18</text><text x=\"126.1\" y=\"53\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">13</text><text x=\"146.12\" y=\"53\" font-size=\"6.5\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">13</text><text x=\"169.14\" y=\"53\" font-size=\"6.5\" font-weight=\"700\" fill=\"#333333\" text-anchor=\"end\">82</text><line x1=\"0\" y1=\"56\" x2=\"252\" y2=\"56\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"0\" y=\"64\" font-size=\"6.5\" font-weight=\"700\" fill=\"#333333\">Σ</text><text x=\"46.02\" y=\"64\" font-size=\"6.5\" font-weight=\"700\" fill=\"#333333\" text-anchor=\"end\">57</text><text x=\"66.04\" y=\"64\" font-size=\"6.5\" font-weight=\"700\" fill=\"#333333\" text-anchor=\"end\">63</text><text x=\"86.06\" y=\"64\" font-size=\"6.5\" font-weight=\"700\" fill=\"#333333\" text-anchor=\"end\">58</text><text x=\"106.08\" y=\"64\" font-size=\"6.5\" font-weight=\"700\" fill=\"#333333\" text-anchor=\"end\">69</text><text x=\"126.1\" y=\"64\" font-size=\"6.5\" font-weight=\"700\" fill=\"#333333\" text-anchor=\"end\">69</text><text x=\"146.12\" y=\"64\" font-size=\"6.5\" font-weight=\"700\" fill=\"#333333\" text-anchor=\"end\">71</text><text x=\"169.14\" y=\"64\" font-size=\"6.5\" font-weight=\"700\" fill=\"#333333\" text-anchor=\"end\">387</text><line x1=\"0\" y1=\"68\" x2=\"252\" y2=\"68\" stroke=\"#333333\" stroke-width=\"0.75\"/></g></svg>"
+    },
+    {
+      "id": "variance-table",
+      "kind": "table",
+      "name": "Variance table",
+      "family": "tables",
+      "status": "draft",
+      "purpose": "The canonical report table: one row per period, actual and baseline value columns, then ΔPL as number plus in-cell impact bar and ΔPL% as number plus in-cell pin, closing on a bold total row. Cost-like measures invert automatically via good_direction.",
+      "notation": {
+        "variance_colouring": {
+          "by": "business impact (good_direction)",
+          "applied to numbers and in-cell marks": null
+        },
+        "number_alignment": "right, shared scale (auto K/M)"
+      },
+      "geometry": null,
+      "data_contract": null,
+      "anti_patterns": null,
+      "applies_rules": [
+        "variance-needs-baseline"
+      ],
+      "basis": "interpretation",
+      "citations": [
+        "IBCS 2.0 UN 4.1 — variance colouring in tables; in-cell chart conventions per common IBCS practice"
+      ],
+      "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"260\" height=\"160\" viewBox=\"0 0 260 160\" font-family=\"'Barlow', sans-serif\"><desc>hatchmark v0.5.1 variance-table</desc><rect x=\"0\" y=\"0\" width=\"260\" height=\"160\" fill=\"#FFFFFF\"/><text x=\"0\" y=\"7.5\" font-size=\"7.5\" fill=\"#333333\"><tspan x=\"0\" dy=\"0\">Alpha Corporation</tspan><tspan x=\"0\" dy=\"10\"><tspan font-weight=\"600\">Net sales ΔPL </tspan>in mEUR</tspan><tspan x=\"0\" dy=\"10\">2026 AC&amp;FC and PL</tspan></text><text x=\"254\" y=\"43.5\" font-size=\"7.5\" fill=\"#333333\" text-anchor=\"end\">mEUR</text><g transform=\"translate(2,36)\"><text x=\"65.28\" y=\"9\" font-size=\"7\" font-weight=\"600\" fill=\"#333333\" text-anchor=\"end\">AC</text><text x=\"100.56\" y=\"9\" font-size=\"7\" font-weight=\"600\" fill=\"#333333\" text-anchor=\"end\">PL</text><text x=\"134.63\" y=\"9\" font-size=\"7\" font-weight=\"600\" fill=\"#333333\" text-anchor=\"end\">ΔPL</text><text x=\"210.35\" y=\"9\" font-size=\"7\" font-weight=\"600\" fill=\"#333333\" text-anchor=\"end\">ΔPL%</text><line x1=\"0\" y1=\"12\" x2=\"252\" y2=\"12\" stroke=\"#333333\" stroke-width=\"0.75\"/><text x=\"28\" y=\"20\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">Jan</text><text x=\"65.28\" y=\"20\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">57</text><text x=\"100.56\" y=\"20\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">60</text><text x=\"134.63\" y=\"20\" font-size=\"7\" font-weight=\"400\" fill=\"#E2001A\" text-anchor=\"end\">−3</text><rect x=\"155.97\" y=\"14.5\" width=\"1.49\" height=\"5\" fill=\"#E2001A\"/><line x1=\"157.46\" y1=\"13\" x2=\"157.46\" y2=\"21\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"210.35\" y=\"20\" font-size=\"7\" font-weight=\"400\" fill=\"#E2001A\" text-anchor=\"end\">−5%</text><line x1=\"233.18\" y1=\"16.5\" x2=\"227.19\" y2=\"16.5\" stroke=\"#E2001A\" stroke-width=\"1.6\"/><rect x=\"225.69\" y=\"15\" width=\"3\" height=\"3\" fill=\"#333333\"/><line x1=\"233.18\" y1=\"13\" x2=\"233.18\" y2=\"21\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"28\" y=\"31\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">Feb</text><text x=\"65.28\" y=\"31\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">63</text><text x=\"100.56\" y=\"31\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">60</text><text x=\"134.63\" y=\"31\" font-size=\"7\" font-weight=\"400\" fill=\"#89B54A\" text-anchor=\"end\">+3</text><rect x=\"157.46\" y=\"25.5\" width=\"1.49\" height=\"5\" fill=\"#89B54A\"/><line x1=\"157.46\" y1=\"24\" x2=\"157.46\" y2=\"32\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"210.35\" y=\"31\" font-size=\"7\" font-weight=\"400\" fill=\"#89B54A\" text-anchor=\"end\">+5%</text><line x1=\"233.18\" y1=\"27.5\" x2=\"239.17\" y2=\"27.5\" stroke=\"#89B54A\" stroke-width=\"1.6\"/><rect x=\"237.67\" y=\"26\" width=\"3\" height=\"3\" fill=\"#333333\"/><line x1=\"233.18\" y1=\"24\" x2=\"233.18\" y2=\"32\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"28\" y=\"42\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">Mar</text><text x=\"65.28\" y=\"42\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">58</text><text x=\"100.56\" y=\"42\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">62</text><text x=\"134.63\" y=\"42\" font-size=\"7\" font-weight=\"400\" fill=\"#E2001A\" text-anchor=\"end\">−4</text><rect x=\"155.48\" y=\"36.5\" width=\"1.98\" height=\"5\" fill=\"#E2001A\"/><line x1=\"157.46\" y1=\"35\" x2=\"157.46\" y2=\"43\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"210.35\" y=\"42\" font-size=\"7\" font-weight=\"400\" fill=\"#E2001A\" text-anchor=\"end\">−6%</text><line x1=\"233.18\" y1=\"38.5\" x2=\"225.45\" y2=\"38.5\" stroke=\"#E2001A\" stroke-width=\"1.6\"/><rect x=\"223.95\" y=\"37\" width=\"3\" height=\"3\" fill=\"#333333\"/><line x1=\"233.18\" y1=\"35\" x2=\"233.18\" y2=\"43\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"28\" y=\"53\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">Apr</text><text x=\"65.28\" y=\"53\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">64</text><text x=\"100.56\" y=\"53\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">62</text><text x=\"134.63\" y=\"53\" font-size=\"7\" font-weight=\"400\" fill=\"#89B54A\" text-anchor=\"end\">+2</text><rect x=\"157.46\" y=\"47.5\" width=\"0.99\" height=\"5\" fill=\"#89B54A\"/><line x1=\"157.46\" y1=\"46\" x2=\"157.46\" y2=\"54\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"210.35\" y=\"53\" font-size=\"7\" font-weight=\"400\" fill=\"#89B54A\" text-anchor=\"end\">+3%</text><line x1=\"233.18\" y1=\"49.5\" x2=\"237.04\" y2=\"49.5\" stroke=\"#89B54A\" stroke-width=\"1.6\"/><rect x=\"235.54\" y=\"48\" width=\"3\" height=\"3\" fill=\"#333333\"/><line x1=\"233.18\" y1=\"46\" x2=\"233.18\" y2=\"54\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"28\" y=\"64\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">May</text><text x=\"65.28\" y=\"64\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">69</text><text x=\"100.56\" y=\"64\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">64</text><text x=\"134.63\" y=\"64\" font-size=\"7\" font-weight=\"400\" fill=\"#89B54A\" text-anchor=\"end\">+5</text><rect x=\"157.46\" y=\"58.5\" width=\"2.48\" height=\"5\" fill=\"#89B54A\"/><line x1=\"157.46\" y1=\"57\" x2=\"157.46\" y2=\"65\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"210.35\" y=\"64\" font-size=\"7\" font-weight=\"400\" fill=\"#89B54A\" text-anchor=\"end\">+8%</text><line x1=\"233.18\" y1=\"60.5\" x2=\"242.54\" y2=\"60.5\" stroke=\"#89B54A\" stroke-width=\"1.6\"/><rect x=\"241.04\" y=\"59\" width=\"3\" height=\"3\" fill=\"#333333\"/><line x1=\"233.18\" y1=\"57\" x2=\"233.18\" y2=\"65\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"28\" y=\"75\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">Jun</text><text x=\"65.28\" y=\"75\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">71</text><text x=\"100.56\" y=\"75\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">64</text><text x=\"134.63\" y=\"75\" font-size=\"7\" font-weight=\"400\" fill=\"#89B54A\" text-anchor=\"end\">+7</text><rect x=\"157.46\" y=\"69.5\" width=\"3.47\" height=\"5\" fill=\"#89B54A\"/><line x1=\"157.46\" y1=\"68\" x2=\"157.46\" y2=\"76\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"210.35\" y=\"75\" font-size=\"7\" font-weight=\"400\" fill=\"#89B54A\" text-anchor=\"end\">+11%</text><line x1=\"233.18\" y1=\"71.5\" x2=\"246.28\" y2=\"71.5\" stroke=\"#89B54A\" stroke-width=\"1.6\"/><rect x=\"244.78\" y=\"70\" width=\"3\" height=\"3\" fill=\"#333333\"/><line x1=\"233.18\" y1=\"68\" x2=\"233.18\" y2=\"76\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"28\" y=\"86\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">Jul</text><text x=\"65.28\" y=\"86\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">68</text><text x=\"100.56\" y=\"86\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">66</text><text x=\"134.63\" y=\"86\" font-size=\"7\" font-weight=\"400\" fill=\"#89B54A\" text-anchor=\"end\">+2</text><rect x=\"157.46\" y=\"80.5\" width=\"0.99\" height=\"5\" fill=\"#89B54A\"/><line x1=\"157.46\" y1=\"79\" x2=\"157.46\" y2=\"87\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"210.35\" y=\"86\" font-size=\"7\" font-weight=\"400\" fill=\"#89B54A\" text-anchor=\"end\">+3%</text><line x1=\"233.18\" y1=\"82.5\" x2=\"236.81\" y2=\"82.5\" stroke=\"#89B54A\" stroke-width=\"1.6\"/><rect x=\"235.31\" y=\"81\" width=\"3\" height=\"3\" fill=\"#333333\"/><line x1=\"233.18\" y1=\"79\" x2=\"233.18\" y2=\"87\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"28\" y=\"97\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">Aug</text><text x=\"65.28\" y=\"97\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">66</text><text x=\"100.56\" y=\"97\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">66</text><text x=\"134.63\" y=\"97\" font-size=\"7\" font-weight=\"400\" fill=\"#0066CC\" text-anchor=\"end\">0</text><rect x=\"157.46\" y=\"91.5\" width=\"0.5\" height=\"5\" fill=\"#0066CC\"/><line x1=\"157.46\" y1=\"90\" x2=\"157.46\" y2=\"98\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"210.35\" y=\"97\" font-size=\"7\" font-weight=\"400\" fill=\"#0066CC\" text-anchor=\"end\">0%</text><line x1=\"233.18\" y1=\"93.5\" x2=\"233.18\" y2=\"93.5\" stroke=\"#0066CC\" stroke-width=\"1.6\"/><rect x=\"231.68\" y=\"92\" width=\"3\" height=\"3\" fill=\"#333333\"/><line x1=\"233.18\" y1=\"90\" x2=\"233.18\" y2=\"98\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"28\" y=\"108\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">Sep</text><text x=\"65.28\" y=\"108\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">72</text><text x=\"100.56\" y=\"108\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">68</text><text x=\"134.63\" y=\"108\" font-size=\"7\" font-weight=\"400\" fill=\"#89B54A\" text-anchor=\"end\">+4</text><rect x=\"157.46\" y=\"102.5\" width=\"1.98\" height=\"5\" fill=\"#89B54A\"/><line x1=\"157.46\" y1=\"101\" x2=\"157.46\" y2=\"109\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"210.35\" y=\"108\" font-size=\"7\" font-weight=\"400\" fill=\"#89B54A\" text-anchor=\"end\">+6%</text><line x1=\"233.18\" y1=\"104.5\" x2=\"240.22\" y2=\"104.5\" stroke=\"#89B54A\" stroke-width=\"1.6\"/><rect x=\"238.72\" y=\"103\" width=\"3\" height=\"3\" fill=\"#333333\"/><line x1=\"233.18\" y1=\"101\" x2=\"233.18\" y2=\"109\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"28\" y=\"119\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">Oct</text><text x=\"65.28\" y=\"119\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">75</text><text x=\"100.56\" y=\"119\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">68</text><text x=\"134.63\" y=\"119\" font-size=\"7\" font-weight=\"400\" fill=\"#89B54A\" text-anchor=\"end\">+7</text><rect x=\"157.46\" y=\"113.5\" width=\"3.47\" height=\"5\" fill=\"#89B54A\"/><line x1=\"157.46\" y1=\"112\" x2=\"157.46\" y2=\"120\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"210.35\" y=\"119\" font-size=\"7\" font-weight=\"400\" fill=\"#89B54A\" text-anchor=\"end\">+10%</text><line x1=\"233.18\" y1=\"115.5\" x2=\"245.51\" y2=\"115.5\" stroke=\"#89B54A\" stroke-width=\"1.6\"/><rect x=\"244.01\" y=\"114\" width=\"3\" height=\"3\" fill=\"#333333\"/><line x1=\"233.18\" y1=\"112\" x2=\"233.18\" y2=\"120\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"28\" y=\"130\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">Nov</text><text x=\"65.28\" y=\"130\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">74</text><text x=\"100.56\" y=\"130\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">70</text><text x=\"134.63\" y=\"130\" font-size=\"7\" font-weight=\"400\" fill=\"#89B54A\" text-anchor=\"end\">+4</text><rect x=\"157.46\" y=\"124.5\" width=\"1.98\" height=\"5\" fill=\"#89B54A\"/><line x1=\"157.46\" y1=\"123\" x2=\"157.46\" y2=\"131\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"210.35\" y=\"130\" font-size=\"7\" font-weight=\"400\" fill=\"#89B54A\" text-anchor=\"end\">+6%</text><line x1=\"233.18\" y1=\"126.5\" x2=\"240.02\" y2=\"126.5\" stroke=\"#89B54A\" stroke-width=\"1.6\"/><rect x=\"238.52\" y=\"125\" width=\"3\" height=\"3\" fill=\"#333333\"/><line x1=\"233.18\" y1=\"123\" x2=\"233.18\" y2=\"131\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"28\" y=\"141\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">Dec</text><text x=\"65.28\" y=\"141\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">81</text><text x=\"100.56\" y=\"141\" font-size=\"7\" font-weight=\"400\" fill=\"#333333\" text-anchor=\"end\">70</text><text x=\"134.63\" y=\"141\" font-size=\"7\" font-weight=\"400\" fill=\"#89B54A\" text-anchor=\"end\">+11</text><rect x=\"157.46\" y=\"135.5\" width=\"5.45\" height=\"5\" fill=\"#89B54A\"/><line x1=\"157.46\" y1=\"134\" x2=\"157.46\" y2=\"142\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"210.35\" y=\"141\" font-size=\"7\" font-weight=\"400\" fill=\"#89B54A\" text-anchor=\"end\">+16%</text><line x1=\"233.18\" y1=\"137.5\" x2=\"252\" y2=\"137.5\" stroke=\"#89B54A\" stroke-width=\"1.6\"/><rect x=\"250.5\" y=\"136\" width=\"3\" height=\"3\" fill=\"#333333\"/><line x1=\"233.18\" y1=\"134\" x2=\"233.18\" y2=\"142\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"0\" y1=\"144\" x2=\"252\" y2=\"144\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"28\" y=\"152\" font-size=\"7\" font-weight=\"600\" fill=\"#333333\" text-anchor=\"end\">Σ</text><text x=\"65.28\" y=\"152\" font-size=\"7\" font-weight=\"600\" fill=\"#333333\" text-anchor=\"end\">818</text><text x=\"100.56\" y=\"152\" font-size=\"7\" font-weight=\"600\" fill=\"#333333\" text-anchor=\"end\">780</text><text x=\"134.63\" y=\"152\" font-size=\"7\" font-weight=\"600\" fill=\"#89B54A\" text-anchor=\"end\">+38</text><rect x=\"157.46\" y=\"146.5\" width=\"18.82\" height=\"5\" fill=\"#89B54A\"/><line x1=\"157.46\" y1=\"145\" x2=\"157.46\" y2=\"153\" stroke=\"#333333\" stroke-width=\"0.5\"/><text x=\"210.35\" y=\"152\" font-size=\"7\" font-weight=\"600\" fill=\"#89B54A\" text-anchor=\"end\">+5%</text><line x1=\"233.18\" y1=\"148.5\" x2=\"239.01\" y2=\"148.5\" stroke=\"#89B54A\" stroke-width=\"1.6\"/><rect x=\"237.51\" y=\"147\" width=\"3\" height=\"3\" fill=\"#333333\"/><line x1=\"233.18\" y1=\"145\" x2=\"233.18\" y2=\"153\" stroke=\"#333333\" stroke-width=\"0.5\"/><line x1=\"0\" y1=\"156\" x2=\"252\" y2=\"156\" stroke=\"#333333\" stroke-width=\"0.75\"/></g></svg>"
+    }
+  ],
+  "rules": [
+    {
+      "id": "bullet-needs-target",
+      "title": "A bullet graph needs a target or reference series",
+      "severity": "warning",
+      "category": "data",
+      "statement": "A bullet graph — the gauge replacement — requires a target/reference series (e.g. PL) alongside the measure; without it the bands and bar have nothing to compare against.",
+      "rationale": "The whole point of a bullet graph is measure-versus-target in context; a bare bar in bands communicates nothing a plain bar would not.",
+      "basis": "house-style",
+      "citations": [
+        "IBCS 2.0 EX 2.2 — v2 audit 2026-08-29: bullet graphs appear nowhere in the standard — EX 2.2 replaces gauges with bars/columns; the bullet form itself is Few's design",
+        "Few, Information Dashboard Design — bullet graph design"
+      ]
+    },
+    {
+      "id": "pseudo-3d",
+      "title": "Avoid pseudo-3D chart effects",
+      "severity": "warning",
+      "category": "notation",
+      "statement": "Three-dimensional chart effects distort size perception and add no information; use the flat equivalent of the same chart type.",
+      "rationale": "SI 2.1 groups pseudo-3D with frames and shades as decoration to remove; perspective makes identical values render at different apparent sizes.",
+      "basis": "standard",
+      "citations": [
+        "IBCS 2.0 SI 2.1 — avoid frames, shades and pseudo-3D; audited 2026-08-29"
+      ]
+    },
+    {
+      "id": "replace-inappropriate-chart-types",
+      "title": "Replace pie, ring, radar and gauge charts",
+      "severity": "warning",
+      "category": "notation",
+      "statement": "Pie and ring charts, radar charts and gauges/speedometers hide the comparisons that bars and columns make visible; replace them with the standard's bar, column or stacked-column forms.",
+      "rationale": "Circular forms permit only one-dimensional reading and waste space on a single value; EX 2 lists them as the inappropriate chart types to replace. The standard's own narrow exception (tiny pies positioned on maps) does not apply to ordinary report pages.",
+      "basis": "standard",
+      "citations": [
+        "IBCS 2.0 EX 2 / EX 2.1 / EX 2.2 — replace inappropriate chart types; pies/rings and gauges/speedometers named explicitly; audited 2026-08-29"
+      ]
+    },
+    {
+      "id": "scenario-notation",
+      "title": "Planned and forecast data carry their semantic fill",
+      "severity": "info",
+      "category": "notation",
+      "statement": "Series representing fictitious (PL/BU) or expected (FC) scenarios must be visually distinguishable from measured data by their fill treatment: outlined for plan/budget, hatched for forecast.",
+      "rationale": "Scenario notation lets the reader tell measured from planned from expected data at a glance, without a legend.",
+      "basis": "standard",
+      "citations": [
+        "IBCS 2.0 UN 3.2 — audited against v2 PDF 2026-08-29"
+      ]
+    },
+    {
+      "id": "shared-scale-groups",
+      "title": "A scale group shares one measure and unit",
+      "severity": "warning",
+      "category": "consistency",
+      "statement": "Charts opted into one scale group render on a single shared value scale; that is only meaningful while every member shows the same measure in the same unit.",
+      "rationale": "Shared scales exist so identical visual heights mean identical values (CH 4.1, CO 5.1); mixing units inside a group makes the shared scale a lie.",
+      "basis": "standard",
+      "citations": [
+        "IBCS 2.0 CH 4.1 / CO 5.1 — identical scales for comparable charts on a page; audited 2026-08-29"
+      ]
+    },
+    {
+      "id": "small-multiples-panels",
+      "title": "Small multiples need several panels",
+      "severity": "info",
+      "category": "data",
+      "statement": "Small multiples exist to compare several same-scale panels of the same measure; with a single panel the chart is just an ordinary chart.",
+      "rationale": "One panel defeats the device — add a series per segment (region, product, entity) so the comparison the layout promises actually exists. All panels share one scale.",
+      "basis": "interpretation",
+      "citations": [
+        "IBCS 2.0 CO 5.1 / CH 4.1 — shared-scale requirement audited 2026-08-29; the min-panels check is ours"
+      ]
+    },
+    {
+      "id": "stacked-mixed-signs",
+      "title": "Stacked charts do not mix positive and negative values",
+      "severity": "warning",
+      "category": "notation",
+      "statement": "Stacked (and 100%-normalised) column or bar charts must not contain both positive and negative values across their series.",
+      "rationale": "With mixed signs the stacked segments no longer sum visually — the total the reader perceives is wrong. Split the measures or use a different chart.",
+      "basis": "standard",
+      "citations": [
+        "IBCS 2.0 EX 1.1 (stacked column charts) — audited 2026-08-29; the standard also cautions against >~5 series and puts the series of central interest on the axis — candidate future rules"
+      ]
+    },
+    {
+      "id": "variance-needs-baseline",
+      "title": "A variance chart needs a baseline scenario",
+      "severity": "warning",
+      "category": "data",
+      "statement": "Variance charts (absolute, relative, contribution) require at least two scenarios — a compared series (typically AC) and a baseline (typically PL, BU or PY) — to compute a variance.",
+      "rationale": "A variance is a comparison; with a single series there is nothing to compare against and the chart cannot mean anything.",
+      "basis": "interpretation",
+      "citations": [
+        "IBCS 2.0 UN 4.1 — section verified 2026-08-29; the check itself is definitional, not a stated rule"
+      ]
+    },
+    {
+      "id": "zero-baseline",
+      "title": "Value axes start at zero",
+      "severity": "warning",
+      "category": "notation",
+      "statement": "Value axes must not be cut: they generally start at zero (CH 1.1, as required by ISO 24896). The standard's one stated exception is indexed data (index period = 100%) with small variances, provided category labels sit at the 100% line. Variance charts are not an \"exception\" — they inherently include the zero baseline, so they are never truncated in the first place.",
+      "rationale": "A cut axis misrepresents the underlying values — differences read far larger than they are.",
+      "basis": "standard",
+      "citations": [
+        "IBCS 2.0 CH 1.1 — audited against v2 PDF 2026-08-29; exemption list beyond indexed charts is our check pragmatics"
+      ]
+    }
+  ],
+  "notation": [
+    {
+      "kind": "colors",
+      "description": "Colour tokens for scenario bases and variance impact, plus the monochrome (print) and colour-vision-deficiency substitution modes.",
+      "items": {
+        "tokens": {
+          "measured-dark": {
+            "hex": "#333333",
+            "role": "Base colour for measured/current data (AC) and the shared scenario hue.",
+            "standard_role": "solid dark (e.g. dark grey — example, not mandate)",
+            "basis": "house-style"
+          },
+          "measured-light": {
+            "hex": "#A0A0A0",
+            "role": "Base colour for earlier measured data (PY) in scenario comparisons.",
+            "standard_role": "solid light (e.g. light grey — example, not mandate)",
+            "basis": "house-style"
+          },
+          "outline-stroke": {
+            "hex": "#333333",
+            "role": "Stroke colour for outlined (PL/BU) fills; fill interior is the background colour.",
+            "basis": "house-style"
+          },
+          "impact-desirable": {
+            "hex": "#89B54A",
+            "role": "Variance whose business impact is desirable.",
+            "standard_role": "bright green",
+            "basis": "house-style"
+          },
+          "impact-undesirable": {
+            "hex": "#E2001A",
+            "role": "Variance whose business impact is undesirable.",
+            "standard_role": "dark red",
+            "note": "UN 4.1 describes the undesirable colour as DARK red; this hex is a bright signal red inherited from the donor. Candidate for a future house-style revision.\n",
+            "basis": "house-style"
+          },
+          "impact-neutral": {
+            "hex": "#0066CC",
+            "role": "Neutral / ambiguous variance; also the highlight colour.",
+            "standard_role": "blue",
+            "basis": "house-style"
+          },
+          "background": {
+            "hex": "#FFFFFF",
+            "role": "Canvas background; also the interior of outlined fills.",
+            "basis": "house-style"
+          }
+        },
+        "modes": {
+          "colour": {
+            "description": "Default mode; impact colours as defined by the tokens."
+          },
+          "monochrome": {
+            "description": "Print-safe substitution, per UN 4.1's own fallback — dark grey for red, light grey for green, medium grey for blue.\n",
+            "map": {
+              "impact-undesirable": "#333333",
+              "impact-desirable": "#BFBFBF",
+              "impact-neutral": "#808080"
+            },
+            "provenance": {
+              "basis": "house-style",
+              "sources": [
+                {
+                  "doc": "IBCS 2.0",
+                  "section": "UN 4.1",
+                  "note": "the substitution scheme (dark/light/medium grey) is the standard's own fallback; the hexes are ours"
+                }
+              ]
+            }
+          },
+          "cvd": {
+            "description": "Colour-vision-deficiency substitution, per UN 4.1's suggestion — replace green with a blue-green, keep desirable bright and undesirable dark; red and blue unchanged.\n",
+            "map": {
+              "impact-desirable": "#1B9E77"
+            },
+            "provenance": {
+              "basis": "house-style",
+              "sources": [
+                {
+                  "doc": "IBCS 2.0",
+                  "section": "UN 4.1",
+                  "note": "blue-green substitution for green is the standard's suggestion; the hex is ours"
+                }
+              ]
+            }
+          }
+        }
+      },
+      "principles": [
+        {
+          "id": "impact-not-sign",
+          "text": "Green and red encode business IMPACT (desirable / undesirable), not raw arithmetic sign. A measure's good direction (higher-is-better for revenue, lower-is-better for cost) decides which sign maps to which colour — the standard's own example colours a cost DECREASE green.",
+          "basis": "standard",
+          "citations": [
+            "IBCS 2.0 UN 4.1 — audited against v2 PDF 2026-08-29"
+          ]
+        },
+        {
+          "id": "no-prescribed-hexes",
+          "text": "The standard explicitly does not prescribe exact colour codes; it requires the semantic roles to be applied consistently within an organisation.",
+          "basis": "standard",
+          "citations": [
+            "IBCS 2.0 UN 4.1"
+          ]
+        }
+      ],
+      "basis": "house-style",
+      "citations": [
+        "IBCS 2.0 UN 4.1 / UN 3.2 — roles and schemes; hexes are ours"
+      ]
+    },
+    {
+      "kind": "comment-markers",
+      "description": "Numbered comment markers link a remark to the period it concerns; the texts appear once, as footnotes below the chart, so commentary never crowds the data.",
+      "items": {
+        "marker": {
+          "glyph": "circled number",
+          "placement": "top of the plot area, centred on the period's category band",
+          "radius": 3.4,
+          "number_font_size": 4.5,
+          "max_markers": 9,
+          "note": "Single-digit markers only; further comments are dropped, not squeezed.",
+          "basis": "house-style"
+        },
+        "footnotes": {
+          "placement": "reserved strip below the category labels, one line per comment",
+          "font_size": 5.5,
+          "overflow": "texts longer than the chart width are ellipsized",
+          "basis": "house-style"
+        },
+        "applicability": {
+          "charts": [
+            "basic-column",
+            "basic-line",
+            "basic-area",
+            "absolute-variance-column",
+            "relative-variance-pins",
+            "waterfall-column",
+            "column-with-variance"
+          ],
+          "excluded": {
+            "contribution-waterfall": "its steps are contributions, not periods — a period-keyed marker has no anchor",
+            "horizontal-and-table-charts": "basic-bar, absolute-variance-bar, relative-variance-pins-bar, variance-table — not yet supported; planned",
+            "small-multiples-column": "panels are too small for in-panel markers; planned as panel-level references"
+          },
+          "basis": "house-style"
+        }
+      },
+      "principles": [
+        {
+          "id": "comments-anchor-to-periods",
+          "text": "A comment marker is anchored to a period and numbered; its text appears exactly once, in a footnote list, in marker order. Markers whose period does not exist in the dataset are dropped rather than guessed.",
+          "basis": "interpretation",
+          "citations": [
+            "IBCS 2.0 CO comment references — concept from the standard; placement rules ours"
+          ]
+        }
+      ],
+      "basis": "house-style",
+      "citations": [
+        "IBCS 2.0 CO — comment reference concept; glyph geometry is house style"
+      ]
+    },
+    {
+      "kind": "geometry",
+      "description": "Cross-chart geometry: category width ratios, axis chrome, variance panel proportions, small-multiples grid behaviour, and reference-level devices.",
+      "items": {
+        "category_width": {
+          "absolute": 0.6667,
+          "relative": 0.3333,
+          "meaning": "Columns/bars for ABSOLUTE measures (currency, quantities) are 2/3 of the category width (leaving 1/3 spacing for a single series); RELATIVE measures (ratios, percentages) are half that — 1/3 of the category width. Line-chart analogue: thick lines for absolute measures, thin lines (half the thick width) for relative ones.\n",
+          "provenance": {
+            "basis": "standard",
+            "sources": [
+              {
+                "doc": "IBCS 2.0",
+                "section": "UN 3.1",
+                "note": "v2 presents this as ISO 24896 required notation but cites no ISO clause numbers; the donor code's 'ISO 24896 §4.5.1' could not be verified — cite UN 3.1"
+              }
+            ]
+          }
+        },
+        "line_widths": {
+          "absolute": 2.4,
+          "relative": 1.2,
+          "meaning": "Line charts mirror the column-width rule: thick lines for absolute measures, thin lines at half the thick width for relative measures.\n",
+          "provenance": {
+            "basis": "standard",
+            "sources": [
+              {
+                "doc": "IBCS 2.0",
+                "section": "UN 3.1",
+                "note": "thick/thin relationship is standard; the pixel values are ours"
+              }
+            ]
+          }
+        },
+        "scenario_line_dashes": {
+          "AC": "solid",
+          "PY": "solid (light colour)",
+          "PL": "dash 6,3",
+          "BU": "dash 6,3",
+          "FC": "dash 4,2",
+          "meaning": "Lines cannot carry area fills, so the scenario fill treatments map to stroke patterns: outlined (PL/BU) becomes a long dash, hatched (FC) a short dash, measured scenarios stay solid.\n",
+          "provenance": {
+            "basis": "house-style",
+            "sources": [
+              {
+                "doc": "IBCS 2.0",
+                "section": "UN 3.2",
+                "note": "the solid/outlined/hatched semantics; the dash mapping is the donor's convention, kept"
+              }
+            ]
+          }
+        },
+        "axis_style": {
+          "axis_color": "#333333",
+          "axis_line_width": 0.75,
+          "tick_length": 3,
+          "tick_line_width": 0.5,
+          "gridline_color": "#E5E7EB",
+          "gridline_width": 0.25,
+          "provenance": {
+            "basis": "house-style"
+          }
+        },
+        "variance_reference_axis": {
+          "meaning": "The zero baseline of a variance chart carries the REFERENCE scenario's semantic design, so the reader sees what the variance is measured against: PL/BU baseline renders as a double line (outlined semantics), PY as a thicker light-grey line (solid light semantics), otherwise a single dark line.\n",
+          "values": {
+            "PL_BU": "two parallel lines at ±0.9 units around zero, stroke 0.5, dark",
+            "PY": "single line, stroke 2, light grey",
+            "other": "single line, stroke 0.75, dark"
+          },
+          "provenance": {
+            "basis": "standard",
+            "sources": [
+              {
+                "doc": "IBCS 2.0",
+                "section": "UN 4.1",
+                "note": "primary source — the variance axis takes an outline double-line for PL/BU references and a solid light fill for PY (pp.53/55); exact strokes are house-style"
+              },
+              {
+                "doc": "IBCS 2.0",
+                "section": "CO 4.2",
+                "note": "multi-tier reduplicated axes carry the reference scenario's semantic design"
+              }
+            ]
+          }
+        },
+        "variance_panel": {
+          "default_ratio": 0.3,
+          "range": [
+            0.15,
+            0.45
+          ],
+          "placement": "Per CO 4.2 (verified 2026-08-29): the secondary (variance) tier sits ABOVE the primary for charts with a horizontal category axis (column / time-series charts) and to the RIGHT of the primary for charts with a vertical category axis (bar / structure charts). Note the standard's terminology: a \"horizontal chart\" is one whose CATEGORY AXIS is horizontal, i.e. a column chart. Three-tier charts stack the third tier further above / further right.\n",
+          "provenance": {
+            "basis": "house-style",
+            "sources": [
+              {
+                "doc": "IBCS 2.0",
+                "section": "CO 4.2",
+                "note": "placement and shared scaling are standard; the 30% size ratio is ours — the standard is silent on tier proportions"
+              }
+            ]
+          }
+        },
+        "small_multiples": {
+          "shared_scale": "required",
+          "outlier_handling": "If one panel's values are much larger, enlarge that chart (CH 4.2 sizes charts to data) — never change its scale.\n",
+          "auto_layout": "Up to three panels sit in a single row; beyond that the grid grows near-square (cols = ceil(sqrt(n))). An explicit column count is clamped to the panel count.\n",
+          "provenance": {
+            "basis": "standard",
+            "sources": [
+              {
+                "doc": "IBCS 2.0",
+                "section": "CO 5.1 / CH 4.1 / CH 4.2",
+                "note": "shared scale and outlier handling are standard; the auto-layout math is ours"
+              }
+            ]
+          }
+        },
+        "index_reference": {
+          "default_value": 100,
+          "devices": {
+            "arrowhead": "required — black, pointing right, at the left of the index point",
+            "label": "required — \"100%\" or \"100\" written left of the arrowhead",
+            "assisting_line": "optional for temporal/structural indexing; required for normalizing"
+          },
+          "provenance": {
+            "basis": "standard",
+            "sources": [
+              {
+                "doc": "IBCS 2.0",
+                "section": "UN 4.2 / UN 4.3",
+                "note": "audited 2026-08-29; donor treated the assisting line as always-on"
+              }
+            ]
+          }
+        },
+        "scale_band": {
+          "meaning": "When comparing charts of the same unit with different scales, a line parallel to the category axis at the same numerical height in all charts, with the area to the axis filled in a light colour (light blue is the standard's example). Shared height typically a power of 10.\n",
+          "provenance": {
+            "basis": "standard",
+            "sources": [
+              {
+                "doc": "IBCS 2.0",
+                "section": "UN 5.2 / CH 4.3",
+                "note": "fill colour is an example, not a mandate"
+              }
+            ]
+          }
+        },
+        "bullet_bands": {
+          "default_fractions": [
+            0.6,
+            0.8,
+            1
+          ],
+          "band_colouring": "neutral graded greys, darkest nearest zero",
+          "note": "Bullet graphs are NOT in the standard (v2 audit: the term appears nowhere in the PDF). EX 2.2 replaces gauges with simpler forms such as bars/columns; the bullet-graph design with graded neutral bands is Stephen Few's, adopted here as house style consistent with the standard's hostility to desirability bandwidths (EX 2.5).\n",
+          "provenance": {
+            "basis": "house-style",
+            "sources": [
+              {
+                "doc": "IBCS 2.0",
+                "section": "EX 2.2 / EX 2.5",
+                "note": "gauge replacement and anti-bandwidth stance only"
+              },
+              {
+                "doc": "Few, Information Dashboard Design",
+                "note": "bullet graph design"
+              }
+            ]
+          }
+        }
+      },
+      "principles": [
+        {
+          "id": "identical-scales",
+          "text": "Charts showing the same measure and unit on one page use identical scales, and small multiples share one scale across all panels. When one panel's values are much larger, enlarge that chart (size charts to data) — never change its scale; where identical scales are truly unworkable, flag the difference with scaling markers or scale bands.",
+          "basis": "standard",
+          "citations": [
+            "IBCS 2.0 CH 4.1 / CO 5.1 / CH 4.2 / CH 4.3"
+          ]
+        }
+      ],
+      "basis": "standard",
+      "citations": [
+        "IBCS 2.0 see per-item provenance — audited against v2 PDF 2026-08-29"
+      ]
+    },
+    {
+      "kind": "period-notation",
+      "description": "Label decorations for analytic period treatments, plus the period-span convention.",
+      "items": {
+        "ytd": {
+          "label_form": "_{label}",
+          "example": "_Jun",
+          "meaning": "Year-to-date accumulation ending at this period.",
+          "source_section": "UN 4.2"
+        },
+        "ytg": {
+          "label_form": "{label}_",
+          "example": "Jun_",
+          "meaning": "Year-to-go — the remainder of the year from this period.",
+          "source_section": "UN 4.2"
+        },
+        "moving": {
+          "label_form": "~{label}",
+          "example": "~Jun",
+          "meaning": "Moving (annual) analysis ending at this period.",
+          "source_section": "UN 4.2"
+        },
+        "average-temporal": {
+          "label_form": "{label}∅",
+          "example": "_Jun 2026∅",
+          "meaning": "Temporal average (YTD/moving averages): the ∅ is APPENDED to the notation (UN 4.2). The donor code used a prefix-only 'average' mode — corrected after the v2 audit.\n",
+          "source_section": "UN 4.2"
+        },
+        "average-structural": {
+          "label_form": "∅{label}",
+          "example": "∅Region",
+          "meaning": "Structural average: the ∅ may be appended or used as a prefix (UN 4.3); hatchmark uses the prefix form.\n",
+          "source_section": "UN 4.3"
+        },
+        "first-day": {
+          "label_form": ".{label}",
+          "example": ".2026",
+          "meaning": "Value as at the first day of the period (opening balance).",
+          "source_section": "UN 3.3"
+        },
+        "last-day": {
+          "label_form": "{label}.",
+          "example": "2026.",
+          "meaning": "Value as at the last day of the period (closing balance).",
+          "source_section": "UN 3.3"
+        },
+        "span": {
+          "label_form": "{from}..{to}",
+          "example": "Jan..Mar",
+          "meaning": "A time span between two period labels — exactly two full stops, no blanks, and deliberately not a typographic ellipsis.\n",
+          "source_section": "UN 3.3"
+        }
+      },
+      "principles": [],
+      "basis": "standard",
+      "citations": [
+        "IBCS 2.0 UN 3.3 / UN 4.2 / UN 4.3 — audited against v2 PDF 2026-08-29; suggestions to apply consistently, not mandates"
+      ]
+    },
+    {
+      "kind": "scenarios",
+      "description": "Data scenarios and their visual encoding. All scenarios share one base hue; the FILL TREATMENT (not colour) carries the scenario distinction, because colour is reserved for analytical meaning.",
+      "items": {
+        "AC": {
+          "name": "Actual",
+          "data_nature": "measured",
+          "meaning": "Figures that have actually occurred in the current period.",
+          "fill": "solid",
+          "color_token": "measured-dark"
+        },
+        "PY": {
+          "name": "Previous Year",
+          "data_nature": "measured",
+          "meaning": "Measured figures from an earlier comparable period.",
+          "fill": "solid",
+          "color_token": "measured-light",
+          "nuance": "Per UN 3.2, the lighter fill applies when earlier periods appear in SCENARIO COMPARISONS; in a pure time series, earlier measured periods need not be lightened. (The donor codebase lightened PY always.)\n"
+        },
+        "PL": {
+          "name": "Plan",
+          "data_nature": "fictitious",
+          "meaning": "Planned figures agreed for the period.",
+          "fill": "outlined",
+          "color_token": "measured-dark",
+          "mnemonic": "Fictitious (planned) data is an empty frame that \"fills up when materialising\"."
+        },
+        "BU": {
+          "name": "Budget",
+          "data_nature": "fictitious",
+          "meaning": "Budgeted figures; visually identical treatment to Plan.",
+          "fill": "outlined",
+          "color_token": "measured-dark"
+        },
+        "FC": {
+          "name": "Forecast",
+          "data_nature": "expected",
+          "meaning": "Expected figures, extrapolated from measured data.",
+          "fill": "hatched",
+          "color_token": "measured-dark",
+          "nuance": "Per UN 3.2, the hatch stripes are drawn in the colour of measured data."
+        }
+      },
+      "principles": [
+        {
+          "id": "fill-carries-scenario",
+          "text": "Scenario identity is encoded by fill treatment (solid / outlined / hatched), never by introducing a new hue. AC and PY are solid (dark and light); PL and BU are outlined; FC is hatched. The standard gives grey only as an example base hue — an organisation may use another base hue so long as it is consistent.",
+          "basis": "standard",
+          "citations": [
+            "IBCS 2.0 UN 3.2 — audited against v2 PDF 2026-08-29"
+          ]
+        },
+        {
+          "id": "color-reserved-for-meaning",
+          "text": "Colour is used only for analytical meaning (SI 2.2); green/red/blue are assigned to variance semantics (UN 4.1). Scenario series must not introduce hues that would collide with that meaning.",
+          "basis": "standard",
+          "citations": [
+            "IBCS 2.0 SI 2.2",
+            "IBCS 2.0 UN 4.1"
+          ]
+        }
+      ],
+      "basis": "standard",
+      "citations": [
+        "IBCS 2.0 UN 3.2 — audited against v2 PDF 2026-08-29"
+      ]
+    },
+    {
+      "kind": "theming",
+      "description": "The boundary between house style and standard: a theme may restyle tokens the standard leaves open (impact hues in colour mode, typeface) and may never alter what the standard fixes (scenario fill treatments, the monochrome and CVD substitution schemes, notation geometry).",
+      "items": {
+        "themable": {
+          "desirable": {
+            "overrides": "impact-desirable",
+            "applies_in": "colour mode only",
+            "role": "Hue for desirable variance impact.",
+            "note": "UN 4.1 fixes the semantic ROLE (and describes green); the exact hue is house style.",
+            "basis": "house-style"
+          },
+          "undesirable": {
+            "overrides": "impact-undesirable",
+            "applies_in": "colour mode only",
+            "role": "Hue for undesirable variance impact.",
+            "note": "UN 4.1 describes dark red; the exact hue is house style.",
+            "basis": "house-style"
+          },
+          "neutral": {
+            "overrides": "impact-neutral",
+            "applies_in": "colour mode only",
+            "role": "Hue for neutral/highlight impact.",
+            "basis": "house-style"
+          },
+          "font-family": {
+            "overrides": "typography base family",
+            "applies_in": "all modes",
+            "role": "Typeface for all chart text.",
+            "basis": "house-style"
+          }
+        },
+        "not-themable": {
+          "scenario-notation": {
+            "reason": "UN 3.2 fixes scenario identity in fill treatment (solid/outlined/ hatched) and light/dark bases. A theme changing these would change what the chart SAYS, not how it looks.\n",
+            "basis": "standard"
+          },
+          "substitution-schemes": {
+            "reason": "The monochrome and CVD palettes are the standard's own accessibility fallbacks (UN 4.1); theming them would defeat their purpose.\n",
+            "basis": "standard"
+          },
+          "geometry": {
+            "reason": "Bar-width ratios (UN 3.1), zero-based axes (CH 1.1) and title structure (UN 2.2) are notation, not decoration.\n",
+            "basis": "standard"
+          }
+        }
+      },
+      "principles": [
+        {
+          "id": "restyle-never-redefine",
+          "text": "A theme restyles house-style tokens; it never redefines standard notation. Every themable token knows which mode it applies in, and overrides outside those bounds are ignored by the renderer.",
+          "basis": "interpretation",
+          "citations": [
+            "IBCS 2.0 UN 4.1 — roles fixed, hues open"
+          ]
+        },
+        {
+          "id": "keep-impact-hues-distinct",
+          "text": "Themed desirable and undesirable hues must remain clearly distinguishable from each other and from the scenario greys; organisations with accessibility requirements should verify their palette or rely on the CVD mode, which themes cannot alter.",
+          "basis": "interpretation",
+          "citations": [
+            "IBCS 2.0 UN 4.1"
+          ]
+        }
+      ],
+      "basis": "interpretation",
+      "citations": [
+        "IBCS 2.0 UN 4.1 / UN 3.2 — boundary derived from which values the standard fixes vs leaves open"
+      ]
+    },
+    {
+      "kind": "typography",
+      "description": "The structured title block and default type sizes. The three-line title structure is standard notation; the specific faces and sizes are house style.",
+      "items": {
+        "title_block": {
+          "lines": [
+            {
+              "field": "reporting_unit",
+              "weight": "regular",
+              "example": "Alpha Corporation",
+              "meaning": "who — including filters"
+            },
+            {
+              "field": "measure_and_unit",
+              "weight": "measure bold, unit regular",
+              "example": "Net sales in mEUR",
+              "meaning": "what"
+            },
+            {
+              "field": "time_period",
+              "weight": "regular",
+              "example": "2026 AC and PL",
+              "meaning": "when — periods, scenario abbreviations, variances"
+            }
+          ],
+          "alignment": "left",
+          "position": "upper-left, beneath the key message",
+          "nuances": [
+            "Long lines 1 or 2 may wrap to two lines.",
+            "AC may be omitted from line 3 when only actuals are shown.",
+            "Subtitles carry per-visual identifiers, centered or left-aligned above their visual.",
+            "On small screens the three lines may collapse into one line separated by pipes."
+          ],
+          "donor_divergence": "The donor renderer drew only a single line (the measure); hatchmark's reference renderer implements the full three-line block per UN 2.2.\n",
+          "provenance": {
+            "basis": "standard",
+            "sources": [
+              {
+                "doc": "IBCS 2.0",
+                "section": "UN 2.2",
+                "note": "audited against v2 PDF 2026-08-29; three lines per ISO 24896"
+              }
+            ]
+          }
+        },
+        "font_family": {
+          "default": "'Barlow', sans-serif",
+          "fallbacks": "Arial, Helvetica, sans-serif",
+          "provenance": {
+            "basis": "house-style"
+          }
+        },
+        "font_sizes": {
+          "title": 7.5,
+          "axis_label": 6.5,
+          "axis_unit": 7.5,
+          "data_label": 6,
+          "table_header": 7,
+          "table_cell": 7,
+          "note": "Pixel values from the donor renderer, proportioned for a ~260x160 canvas; scale with the render size.\n",
+          "provenance": {
+            "basis": "house-style"
+          }
+        }
+      },
+      "principles": [],
+      "basis": "house-style",
+      "citations": [
+        "IBCS 2.0 UN 2.2 — title structure only; sizes/faces are ours"
+      ]
+    }
+  ]
+}
