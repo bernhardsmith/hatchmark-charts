@@ -1499,9 +1499,11 @@
     const allValues = rows.flatMap((r) => [r.ac ?? 0, r.pl ?? 0]);
     const axis = { min: 0, max: 1, ticks: 0, decimals, prefix: options.axis?.prefix ?? "", suffix: options.axis?.suffix ?? "", label: options.axis?.label ?? dataset.unit };
     const fmt2 = makeFormatter(allValues, axis, options.axis?.auto_scale !== false);
-    const height = options.height ?? Math.max(120, 8 + HEADER_H + (rows.length + 1) * ROW_H + 46);
     const width = options.width ?? 260;
     const title = resolveTitle(dataset, options, ` \u0394${baseline}`);
+    const contentH = HEADER_H + (rows.length + 1) * ROW_H + 2;
+    const probeLayout = computeLayout(width, 100, title, false, "", 0);
+    const height = options.height ?? Math.max(100, probeLayout.padTop + contentH + 12 + 4);
     const layout = computeLayout(width, height, title, false, "", 0);
     const wLabel = 30;
     const wNum = Math.max(26, layout.plotW * 0.14);
@@ -1612,8 +1614,9 @@
     const contentW = wLabel + nCols * wNum + totalGap + wNum + 2;
     const contentH = HEADER_H2 + bodyRows * ROW_H2 + 2;
     const width = options.width ?? Math.max(200, contentW + 42);
-    const height = options.height ?? Math.max(100, contentH + 66);
     const title = resolveTitle(dataset, options);
+    const probe = computeLayout(width, 100, title, false, "", 0);
+    const height = options.height ?? probe.padTop + contentH + 12 + 4;
     const layout = computeLayout(width, height, title, false, "", 0);
     const tableScale = Math.min(1, layout.plotW / contentW, layout.plotH / contentH);
     const xLabel = 0;
@@ -2031,7 +2034,7 @@
   }
 
   // src/liveCharts.ts
-  var REGISTRY_VERSION = "0.5.0";
+  var REGISTRY_VERSION = "0.5.1";
   var SETTINGS_KEY = "hatchmark-live-charts";
   var THEME_KEY = "hatchmark-theme";
   function newRecordId() {
@@ -2833,17 +2836,20 @@
   function $(id) {
     return document.getElementById(id);
   }
+  var CHART_HEIGHTS = { "column-with-variance": 260, "small-multiples-column": 230 };
+  var TABLE_CHARTS = /* @__PURE__ */ new Set(["variance-table", "time-series-table", "cross-table"]);
+  var DEFAULT_CHART_WIDTH = 320;
   function readOptions() {
     const chart = $("chart-type").value;
     const baseline = $("baseline").value;
     const colourMode = $("colour-mode").value;
     const showLabels = $("show-labels").checked;
-    const chartHeights = { "column-with-variance": 260, "small-multiples-column": 230 };
     const comments = parseCommentLines($("comments-input").value);
     const autoScale = $("auto-scale").checked;
+    const isTable = TABLE_CHARTS.has(chart);
     const options = {
-      width: 320,
-      height: chart === "variance-table" ? void 0 : chartHeights[chart] ?? 200,
+      width: isTable ? void 0 : DEFAULT_CHART_WIDTH,
+      height: isTable ? void 0 : CHART_HEIGHTS[chart] ?? 200,
       show_data_labels: showLabels,
       colour_mode: colourMode,
       baseline,
@@ -3171,7 +3177,12 @@
       src.textContent = "Source";
       src.title = "Select this chart\u2019s source range";
       src.addEventListener("click", () => showSource(r));
-      row.append(label, edit, src);
+      const size = document.createElement("button");
+      size.className = "secondary small";
+      size.textContent = "Size";
+      size.title = "Restore this picture\u2019s natural size and aspect ratio (position stays put)";
+      size.addEventListener("click", () => resetSize(r.id));
+      row.append(label, edit, src, size);
       host.appendChild(row);
     }
     $("charts-section").style.display = records.length > 0 ? "" : "none";
@@ -3188,6 +3199,54 @@
       if (member.options.scale_group === group && member.id !== exceptId) {
         await refreshRecord(member, true);
       }
+    }
+  }
+  async function resetSize(recordId) {
+    const record = loadRecords().find((r) => r.id === recordId);
+    if (!record) return;
+    try {
+      let w;
+      let h;
+      if (TABLE_CHARTS.has(record.chart)) {
+        let values = null;
+        await Excel.run(async (ctx) => {
+          const sheet = ctx.workbook.worksheets.getItemOrNullObject(record.worksheetId);
+          await ctx.sync();
+          if (sheet.isNullObject) return;
+          const bang = record.sourceAddress.lastIndexOf("!");
+          const range = sheet.getRange(bang >= 0 ? record.sourceAddress.slice(bang + 1) : record.sourceAddress);
+          range.load("values");
+          await ctx.sync();
+          values = range.values;
+        });
+        if (!values) throw new Error("The source worksheet no longer exists.");
+        const mapped = rangeToDataset(values, record.meta);
+        if (!mapped.dataset) throw new Error(mapped.errors[0] ?? "The source no longer parses.");
+        const svg = renderChart(record.chart, mapped.dataset, {
+          ...record.options,
+          width: void 0,
+          height: void 0,
+          axis: { auto_scale: record.options.auto_scale !== false },
+          theme: loadWorkbookTheme() ?? void 0,
+          compare: ["AC", "FC"]
+        });
+        const size = svg.match(/width="(\d+(?:\.\d+)?)" height="(\d+(?:\.\d+)?)"/);
+        if (!size) throw new Error("Could not measure the table render.");
+        w = Number(size[1]);
+        h = Number(size[2]);
+      } else {
+        w = DEFAULT_CHART_WIDTH;
+        h = CHART_HEIGHTS[record.chart] ?? 200;
+      }
+      record.options.width = w;
+      record.options.height = h;
+      record.updated = (/* @__PURE__ */ new Date()).toISOString();
+      await upsertRecord(record);
+      const res = await refreshRecord(record, true, { width: w, height: h });
+      setStatus(res.ok ? `Restored natural size (${Math.round(w)}\xD7${Math.round(h)}): ${chartListLabel(record)}` : res.message, !res.ok);
+      updateLiveCount();
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : String(err), true);
     }
   }
   async function showSource(r) {
