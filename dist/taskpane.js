@@ -2903,6 +2903,7 @@
     $("live-count").textContent = n === 0 ? "No live charts in this workbook yet." : `${n} live chart${n === 1 ? "" : "s"} in this workbook.`;
     $("refresh-all").disabled = n === 0;
     renderChartList();
+    void syncRibbonState();
   }
   function refreshPreview() {
     if (!state.dataset) return;
@@ -3619,6 +3620,75 @@
       setStatus(err instanceof Error ? err.message : String(err), true);
     }
   }
+  async function surfacePane() {
+    try {
+      await Office.addin.showAsTaskpane();
+    } catch {
+    }
+  }
+  async function ribbonInsertChart(event) {
+    try {
+      await surfacePane();
+      await loadSelection();
+      if (state.dataset && state.source) await insertChart();
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : String(err), true);
+    } finally {
+      event.completed();
+    }
+  }
+  async function ribbonCheckWorkbook(event) {
+    try {
+      await surfacePane();
+      const section = $("check-section");
+      section.open = true;
+      await runWorkbookCheck();
+    } catch (err) {
+      setStatus(err instanceof Error ? err.message : String(err), true);
+    } finally {
+      event.completed();
+    }
+  }
+  async function ribbonRefreshAll(event) {
+    try {
+      const records = loadRecords();
+      if (records.length === 0) {
+        await surfacePane();
+        setStatus("No live Hatchmark charts in this workbook yet \u2014 insert one first.");
+        return;
+      }
+      setStatus(await refreshAll());
+      updateLiveCount();
+      if ($("check-results").childElementCount > 0) await runWorkbookCheck();
+    } catch (err) {
+      await surfacePane();
+      setStatus(err instanceof Error ? err.message : String(err), true);
+    } finally {
+      event.completed();
+    }
+  }
+  async function syncRibbonState() {
+    try {
+      if (!Office.context.requirements.isSetSupported("RibbonApi", "1.1")) return;
+      const enabled = loadRecords().length > 0;
+      if (enabled === lastRibbonEnabled) return;
+      lastRibbonEnabled = enabled;
+      await Office.ribbon.requestUpdate({
+        tabs: [{
+          id: "Hatchmark.Tab",
+          groups: [{
+            id: "Hatchmark.Group2",
+            controls: [
+              { id: "Hatchmark.CheckButton", enabled },
+              { id: "Hatchmark.RefreshButton", enabled }
+            ]
+          }]
+        }]
+      });
+    } catch {
+    }
+  }
+  var lastRibbonEnabled = null;
   Office.onReady((info) => {
     if (info.host !== Office.HostType.Excel) {
       setStatus("This add-in runs in Excel.", true);
@@ -3659,6 +3729,11 @@
       applyAutoOpen(on);
       setStatus(on ? "This pane will reopen automatically with this workbook (after you save it)." : "This pane will no longer open automatically with this workbook.");
     });
+    if (Office.actions?.associate) {
+      Office.actions.associate("ribbonInsertChart", ribbonInsertChart);
+      Office.actions.associate("ribbonCheckWorkbook", ribbonCheckWorkbook);
+      Office.actions.associate("ribbonRefreshAll", ribbonRefreshAll);
+    }
     buildPicker();
     buildTemplates();
     showTheme(loadWorkbookTheme());
@@ -3694,6 +3769,7 @@
       setStatus("Refreshing\u2026");
       setStatus(await refreshAll());
       updateLiveCount();
+      if ($("check-results").childElementCount > 0) await runWorkbookCheck();
     });
     $("live-toggle").addEventListener("change", () => {
       setLiveEnabled($("live-toggle").checked);

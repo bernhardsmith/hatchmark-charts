@@ -40,8 +40,10 @@
             <Description resid="GetStarted.Description" />
             <LearnMoreUrl resid="Commands.Url" />
           </GetStarted>
+          <FunctionFile resid="Taskpane.Url" />
           <ExtensionPoint xsi:type="PrimaryCommandSurface">
-            <!-- A dedicated ribbon tab so the add-in is unmissable. -->
+            <!-- A dedicated ribbon tab so the add-in is unmissable, and so the
+                 workflow reads at a glance: make a chart, then keep it honest. -->
             <CustomTab id="Hatchmark.Tab">
               <Group id="Hatchmark.Group1">
                 <Label resid="Group.Label" />
@@ -66,6 +68,59 @@
                     <SourceLocation resid="Taskpane.Url" />
                   </Action>
                 </Control>
+                <Control xsi:type="Button" id="Hatchmark.InsertButton">
+                  <Label resid="Insert.Label" />
+                  <Supertip>
+                    <Title resid="Insert.Label" />
+                    <Description resid="Insert.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Insert.16" />
+                    <bt:Image size="32" resid="Insert.32" />
+                    <bt:Image size="80" resid="Insert.80" />
+                  </Icon>
+                  <Action xsi:type="ExecuteFunction">
+                    <FunctionName>ribbonInsertChart</FunctionName>
+                  </Action>
+                </Control>
+              </Group>
+              <Group id="Hatchmark.Group2">
+                <Label resid="Group2.Label" />
+                <Icon>
+                  <bt:Image size="16" resid="Check.16" />
+                  <bt:Image size="32" resid="Check.32" />
+                  <bt:Image size="80" resid="Check.80" />
+                </Icon>
+                <Control xsi:type="Button" id="Hatchmark.CheckButton">
+                  <Label resid="Check.Label" />
+                  <Supertip>
+                    <Title resid="Check.Label" />
+                    <Description resid="Check.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Check.16" />
+                    <bt:Image size="32" resid="Check.32" />
+                    <bt:Image size="80" resid="Check.80" />
+                  </Icon>
+                  <Action xsi:type="ExecuteFunction">
+                    <FunctionName>ribbonCheckWorkbook</FunctionName>
+                  </Action>
+                </Control>
+                <Control xsi:type="Button" id="Hatchmark.RefreshButton">
+                  <Label resid="Refresh.Label" />
+                  <Supertip>
+                    <Title resid="Refresh.Label" />
+                    <Description resid="Refresh.Tooltip" />
+                  </Supertip>
+                  <Icon>
+                    <bt:Image size="16" resid="Refresh.16" />
+                    <bt:Image size="32" resid="Refresh.32" />
+                    <bt:Image size="80" resid="Refresh.80" />
+                  </Icon>
+                  <Action xsi:type="ExecuteFunction">
+                    <FunctionName>ribbonRefreshAll</FunctionName>
+                  </Action>
+                </Control>
               </Group>
               <Label resid="Tab.Label" />
             </CustomTab>
@@ -78,6 +133,15 @@
         <bt:Image id="Icon.16" DefaultValue="https://bernhardsmith.github.io/hatchmark-charts/assets/icon-16.png" />
         <bt:Image id="Icon.32" DefaultValue="https://bernhardsmith.github.io/hatchmark-charts/assets/icon-32.png" />
         <bt:Image id="Icon.80" DefaultValue="https://bernhardsmith.github.io/hatchmark-charts/assets/icon-80.png" />
+        <bt:Image id="Insert.16" DefaultValue="https://bernhardsmith.github.io/hatchmark-charts/assets/icon-insert-16.png" />
+        <bt:Image id="Insert.32" DefaultValue="https://bernhardsmith.github.io/hatchmark-charts/assets/icon-insert-32.png" />
+        <bt:Image id="Insert.80" DefaultValue="https://bernhardsmith.github.io/hatchmark-charts/assets/icon-insert-80.png" />
+        <bt:Image id="Check.16" DefaultValue="https://bernhardsmith.github.io/hatchmark-charts/assets/icon-check-16.png" />
+        <bt:Image id="Check.32" DefaultValue="https://bernhardsmith.github.io/hatchmark-charts/assets/icon-check-32.png" />
+        <bt:Image id="Check.80" DefaultValue="https://bernhardsmith.github.io/hatchmark-charts/assets/icon-check-80.png" />
+        <bt:Image id="Refresh.16" DefaultValue="https://bernhardsmith.github.io/hatchmark-charts/assets/icon-refresh-16.png" />
+        <bt:Image id="Refresh.32" DefaultValue="https://bernhardsmith.github.io/hatchmark-charts/assets/icon-refresh-32.png" />
+        <bt:Image id="Refresh.80" DefaultValue="https://bernhardsmith.github.io/hatchmark-charts/assets/icon-refresh-80.png" />
       </bt:Images>
       <bt:Urls>
         <bt:Url id="Commands.Url" DefaultValue="https://github.com/bernhardsmith/hatchmark-excel" />
@@ -86,13 +150,21 @@
       <bt:ShortStrings>
         <bt:String id="Tab.Label" DefaultValue="Hatchmark" />
         <bt:String id="GetStarted.Title" DefaultValue="Hatchmark Charts" />
-        <bt:String id="Group.Label" DefaultValue="Hatchmark" />
-        <bt:String id="Button.Label" DefaultValue="Hatchmark Charts" />
+        <bt:String id="Group.Label" DefaultValue="Charts" />
+        <bt:String id="Group2.Label" DefaultValue="Workbook" />
+        <bt:String id="Insert.Label" DefaultValue="Insert chart" />
+        <bt:String id="Check.Label" DefaultValue="Check workbook" />
+        <bt:String id="Refresh.Label" DefaultValue="Refresh all" />
+        <bt:String id="Button.Label" DefaultValue="Open Hatchmark" />
         <bt:String id="Button.Title" DefaultValue="Insert a compliant chart" />
       </bt:ShortStrings>
       <bt:LongStrings>
         <bt:String id="GetStarted.Description" DefaultValue="Select a data range and insert an ISO 24896-aligned chart." />
         <bt:String id="Button.Tooltip" DefaultValue="Open the Hatchmark Charts pane: select a range with scenario rows (AC, PY, PL, BU, FC) and insert a chart with standard notation." />
+
+        <bt:String id="Insert.Tooltip" DefaultValue="Insert a chart from the selected range using your last chart type and settings. Opens the pane if it needs more from you." />
+        <bt:String id="Check.Tooltip" DefaultValue="Grade every chart in this workbook against the notation rules — including native Excel charts — and list what to fix, with clause citations." />
+        <bt:String id="Refresh.Tooltip" DefaultValue="Re-render every live Hatchmark chart from its source data. Useful after opening a workbook someone else edited." />
       </bt:LongStrings>
     </Resources>
   </VersionOverrides>
