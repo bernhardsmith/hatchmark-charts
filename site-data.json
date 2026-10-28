@@ -472,8 +472,7 @@
         },
         "totals": "reference total at the top in its scenario notation, compared total at the bottom, both labelled with the entity (option total_label, default Total)",
         "data_labels": {
-          "placement": "in the direction of the contribution",
-          "signed; totals plain and bold": null,
+          "placement": "in the direction of the contribution, signed; totals plain and bold",
           "optional": true
         },
         "connectors": "0.03 em black lines at each closing level",
@@ -1174,9 +1173,7 @@
       "notation": {
         "segment_fills": "a grey ramp from measured-dark (first segment) to measured-light, in the scenario notation of each value (solid AC, hatched FC, outlined PL/BU)",
         "data_labels": {
-          "placement": "centred within the segment (white on a dark solid fill",
-          "ink otherwise": null,
-          "on a ground plate over a hatch); totals 0.3 em above the stack; a segment too small for its number is left unlabelled": null,
+          "placement": "centred within the segment (white on a dark solid fill, ink otherwise, on a ground plate over a hatch); totals 0.3 em above the stack; a segment too small for its number is left unlabelled",
           "optional": true
         },
         "integrated_legend": "segment names right of the last column, each at its segment's centre",
@@ -1283,8 +1280,7 @@
       "notation": {
         "scenario_fills": "required (deltas and totals; FC hatched)",
         "data_labels": {
-          "format": "signed for deltas",
-          "plain for totals": null,
+          "format": "signed for deltas, plain for totals",
           "optional": true
         },
         "value_axis": "omitted when data labels are shown — the labels carry the values, so axis, ticks and gridlines are redundant (SI 3.1); the unit stays in the title; unlabelled waterfalls keep the axis",
@@ -1391,8 +1387,7 @@
       "purpose": "The canonical report table: one row per period, actual and baseline value columns (PL before AC — manual 4.1), then ΔPL as number plus in-cell impact bar and ΔPL% as number plus in-cell pin, closing on a bold total row. Cost-like measures invert automatically via good_direction.",
       "notation": {
         "variance_colouring": {
-          "by": "business impact (good_direction)",
-          "applied to numbers and in-cell marks": null
+          "by": "business impact (good_direction), applied to numbers and in-cell marks"
         },
         "number_alignment": "right, shared scale (auto K/M)"
       },
